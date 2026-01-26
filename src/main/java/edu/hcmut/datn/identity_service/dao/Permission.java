@@ -5,28 +5,30 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "permissions")
 public class Permission {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "per_id")
     private long perId;
     
-    @Column(unique = true)
+    @Column(name = "per_code")
     private String perCode;
     
-    @Column
+    @Column(name = "per_name")
     private String perName;
     
-    @Column
+    @Column(name = "per_des")
     private String perDescription;
     
-    @Column
+    @Column(name = "is_active")
     private boolean isActive;
     
-    @Column(name = "createdAt", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
-    @Column(name = "updatedAt")
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
     @PrePersist

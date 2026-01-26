@@ -5,24 +5,26 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "user_group")
 public class UserGroup {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_group_id")
     private long userGroupId;
     
-    @Column
+    @Column(name = "user_id")
     private long userId;
     
-    @Column
+    @Column(name = "group_id")
     private long groupId;
     
-    @Column
+    @Column(name = "is_active")
     private boolean isActive;
     
-    @Column(name = "createdAt", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
-    @Column(name = "updatedAt")
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
     @PrePersist
