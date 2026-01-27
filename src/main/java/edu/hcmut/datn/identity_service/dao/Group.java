@@ -1,6 +1,8 @@
 package edu.hcmut.datn.identity_service.dao;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -10,15 +12,22 @@ public class Group {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "group_id")
+    @Getter
     private long groupId;
     
     @Column(name = "group_name")
+    @Setter
+    @Getter
     private String groupName;
     
     @Column(name = "group_des")
+    @Setter
+    @Getter
     private String description;
     
     @Column(name = "is_active")
+    @Setter
+    @Getter
     private boolean isActive;
     
     @Column(name = "created_at", nullable = false, updatable = false)
