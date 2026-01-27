@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/group")
 public class GroupController {
@@ -17,7 +19,7 @@ public class GroupController {
         return null;
     }
     
-    public ResponseEntity<ApiResponse<Group>> getAll() {
+    public ResponseEntity<ApiResponse<List<Group>>> getAll() {
         return null;
     }
     
