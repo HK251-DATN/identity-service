@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.hcmut.datn.identity_service.dao.Group;
+import edu.hcmut.datn.identity_service.dao.Permission;
 import edu.hcmut.datn.identity_service.dao.User;
 import edu.hcmut.datn.identity_service.dto.request.UserRequest;
 import edu.hcmut.datn.identity_service.dto.response.ApiResponse;
@@ -111,5 +113,13 @@ public class UserController {
         }
 
         return ResponseEntity.ok().body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Delete success", null));
+    }
+
+    public ResponseEntity<ApiResponse<List<Group>>> getGroups() {
+        return null;
+    }
+
+    public ResponseEntity<ApiResponse<List<Permission>>> getPermissions() {
+        return null;
     }
 }
