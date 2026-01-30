@@ -15,4 +15,6 @@ public interface UserService {
     User update(Long id, User user);
     
     Boolean delete(Long id);
+    
+    Boolean authenticate(String email, String rawPassword);
 }

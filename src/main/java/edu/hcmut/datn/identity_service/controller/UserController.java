@@ -30,6 +30,17 @@ public class UserController {
         return ResponseEntity.ok().body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Create user success", createResult));
     }
     
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<User>> login(@RequestBody UserRequest userRequest) {
+        Boolean loginResult = userService.authenticate(userRequest.getEmail(), userRequest.getPassword());
+        
+        if (!loginResult) {
+            return ResponseEntity.badRequest().body(ApiResponse.ERROR(HttpStatus.BAD_REQUEST.toString(), "Invalid credential", null));
+        }
+        
+        return ResponseEntity.ok().body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Valid credential", null));
+    }
+    
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<User>> getById(@PathVariable Long id) {
         User getResult = userService.get(id);

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,17 +21,20 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
     
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
     @PersistenceContext
     private EntityManager entityManager;
     
     @Override
     public User create (User user) {
-        // TODO: This is not safe, add hash function for password
         try {
             Optional<User> curUser = userRepository.findByUserEmail(user.getUserEmail());
             if (curUser.isPresent()) {
                 throw new RuntimeException("Duplicated user");
             } else {
+                user.setHashedPwd(passwordEncoder.encode(user.getHashedPwd()));
                 return userRepository.save(user);
             }
         } catch (Exception e) {
@@ -88,5 +92,14 @@ public class UserServiceImpl implements UserService {
             // TODO: Log the exception
             return false;
         }
+    }
+    
+    @Override
+    public Boolean authenticate(String email, String rawPassword) {
+        if (!userRepository.existsByUserEmail(email)) {
+            return false;
+        }
+        
+        return passwordEncoder.matches(rawPassword, userRepository.findByUserEmail(email).get().getHashedPwd());
     }
 }
