@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.hcmut.datn.identity_service.dao.Group;
-import edu.hcmut.datn.identity_service.dao.Permission;
 import edu.hcmut.datn.identity_service.dao.User;
+import edu.hcmut.datn.identity_service.dto.misc.GroupBasicView;
+import edu.hcmut.datn.identity_service.dto.misc.PermissionBasicView;
 import edu.hcmut.datn.identity_service.dto.request.UserRequest;
 import edu.hcmut.datn.identity_service.dto.response.ApiResponse;
 import edu.hcmut.datn.identity_service.security.jwt.JwtService;
@@ -115,11 +115,29 @@ public class UserController {
         return ResponseEntity.ok().body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Delete success", null));
     }
 
-    public ResponseEntity<ApiResponse<List<Group>>> getGroups() {
-        return null;
+    @GetMapping("/{userId}/group")
+    public ResponseEntity<ApiResponse<List<GroupBasicView>>> getGroups(@PathVariable Long userId) {
+        List<GroupBasicView> results = userService.getUserGroups(userId);
+
+        if (results.isEmpty()) {
+            return ResponseEntity.ok()
+                    .body(ApiResponse.SKIP_AS_GOOD(HttpStatus.OK.toString(), "No group found", null));
+        }
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Get user's groups success", results));
     }
 
-    public ResponseEntity<ApiResponse<List<Permission>>> getPermissions() {
-        return null;
+    @GetMapping("/{userId}/permission")
+    public ResponseEntity<ApiResponse<List<PermissionBasicView>>> getPermissions(@PathVariable Long userId) {
+        List<PermissionBasicView> results = userService.getUserPermissions(userId);
+
+        if (results.isEmpty()) {
+            return ResponseEntity.ok()
+                    .body(ApiResponse.SKIP_AS_GOOD(HttpStatus.OK.toString(), "No permission found", null));
+        }
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Get user's permissions success", results));
     }
 }

@@ -1,0 +1,357 @@
+{
+	"info": {
+		"_postman_id": "5ef7bb1c-4454-4b42-8636-60c79ea862fb",
+		"name": "DATN",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "39000944"
+	},
+	"item": [
+		{
+			"name": "IdentityService",
+			"item": [
+				{
+					"name": "User",
+					"item": [
+						{
+							"name": "Create user",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"user8@gmail.com\",\n    \"password\": \"admin\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{IdentityURL}}/{{UserApiPrefix}}"
+							},
+							"response": []
+						},
+						{
+							"name": "Login",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"user@gmail.com\",\n    \"password\": \"admin\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{IdentityURL}}/{{UserApiPrefix}}/login"
+							},
+							"response": []
+						},
+						{
+							"name": "Get all users",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{IdentityURL}}/{{UserApiPrefix}}"
+							},
+							"response": []
+						},
+						{
+							"name": "Get user by Id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{IdentityURL}}/{{UserApiPrefix}}/3"
+							},
+							"response": []
+						},
+						{
+							"name": "Update user",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"user@gmail.com\",\n    \"password\": \"admin1\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{IdentityURL}}/{{UserApiPrefix}}/3"
+							},
+							"response": []
+						},
+						{
+							"name": "Delete user",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": "{{IdentityURL}}/{{UserApiPrefix}}/3"
+							},
+							"response": []
+						},
+						{
+							"name": "Get user's groups",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{IdentityURL}}/{{UserApiPrefix}}/1/group"
+							},
+							"response": []
+						},
+						{
+							"name": "Get user's permissions",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{IdentityURL}}/{{UserApiPrefix}}/1/permission"
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": {
+							"token": "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ1c2VyQGdtYWlsLmNvbSIsImlzcyI6ImlkZW50aXR5LXNlcnZpY2UiLCJpYXQiOjE3Njk5MzUxODksImV4cCI6MTc3MDAyMTU4OSwidXNlcklkIjowLCJ1c2VyRW1haWwiOiJ1c2VyQGdtYWlsLmNvbSJ9.oEFwt8q8ioyqgKTsYHA7cP_aHDAAKHRCNSAv8egItV5I47sjNe14wEHxuLO9uG2WuJqac1AHyH-qQaYSDONbxE3SuDN1YopS5jG3pKnqygDB0eVovuE5QZ0T-mIPp8gVgHdInG-BeQgPRVRwhOHAGOKTgL_htieq4CNClY8Wjd-j2kaRGWuei5b16wHslYviRkU8txZPP0uuOF_izr3oU8MR3pU0dsqzlq4YvfFxwMDyCx8L0bSCZ2s0L8kDqV3yHdQsvEtVyy4YgZvjt_h3cZuKFft49dcu9c1iZau7Haj4y8_7ptezwcu_3HaruhQsB8eWxUZRrDcYCp0G3oOr_w"
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Group",
+					"item": [
+						{
+							"name": "Create group",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"groupName\":\"\",\n    \"description\":\"\",\n    \"isActive\":true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{IdentityURL}}/{{GroupApiPrefix}}"
+							},
+							"response": []
+						},
+						{
+							"name": "Read group",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"groupName\":\"\",\n    \"description\":\"\",\n    \"isActive\":true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{IdentityURL}}/{{GroupApiPrefix}}/1"
+							},
+							"response": []
+						},
+						{
+							"name": "Update group",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"groupName\":\"\",\n    \"description\":\"\",\n    \"isActive\":true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{IdentityURL}}/{{GroupApiPrefix}}/1"
+							},
+							"response": []
+						},
+						{
+							"name": "Delete group",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"groupName\":\"\",\n    \"description\":\"\",\n    \"isActive\":true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{IdentityURL}}/{{GroupApiPrefix}}/1"
+							},
+							"response": []
+						},
+						{
+							"name": "Get group's users",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{IdentityURL}}/{{GroupApiPrefix}}/1/user"
+							},
+							"response": []
+						},
+						{
+							"name": "Grant permission to group",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"groupId\": 1,\n    \"perId\": 11,\n    \"isActive\": true,\n    \"validUntil\": \"2026-02-02T00:00:00\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{IdentityURL}}/{{GroupApiPrefix}}/1/permission"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Permission",
+					"item": [
+						{
+							"name": "Create permission",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"perCode\": \"\",\n    \"perName\": \"\",\n    \"perDescription\": \"\",\n    \"isActive\": \"\"    \n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{IdentityURL}}/{{PermissionApiPrefix}}"
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": {
+					"token": "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ1c2VyQGdtYWlsLmNvbSIsImlzcyI6ImlkZW50aXR5LXNlcnZpY2UiLCJpYXQiOjE3Njk5MzUxODksImV4cCI6MTc3MDAyMTU4OSwidXNlcklkIjowLCJ1c2VyRW1haWwiOiJ1c2VyQGdtYWlsLmNvbSJ9.oEFwt8q8ioyqgKTsYHA7cP_aHDAAKHRCNSAv8egItV5I47sjNe14wEHxuLO9uG2WuJqac1AHyH-qQaYSDONbxE3SuDN1YopS5jG3pKnqygDB0eVovuE5QZ0T-mIPp8gVgHdInG-BeQgPRVRwhOHAGOKTgL_htieq4CNClY8Wjd-j2kaRGWuei5b16wHslYviRkU8txZPP0uuOF_izr3oU8MR3pU0dsqzlq4YvfFxwMDyCx8L0bSCZ2s0L8kDqV3yHdQsvEtVyy4YgZvjt_h3cZuKFft49dcu9c1iZau7Haj4y8_7ptezwcu_3HaruhQsB8eWxUZRrDcYCp0G3oOr_w"
+				}
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": {
+			"token": "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ1c2VyQGdtYWlsLmNvbSIsImlzcyI6ImlkZW50aXR5LXNlcnZpY2UiLCJpYXQiOjE3Njk5NTI3NzUsImV4cCI6MTc3MDAzOTE3NSwidXNlcklkIjowLCJ1c2VyRW1haWwiOiJ1c2VyQGdtYWlsLmNvbSJ9.ZmNHrgMd_LwocyZGZ2GKZlOS0J-TrNo-q-b60-g54AVbkCYJKRNE-u2l3Kyev2i4y65xPrjXKFzManUYOq_j_E1HaZddf8KpzTJlelSxlOlN-eezBsvDR0dwSWQrBbzrG-Gr44XFqcU_ctn7BLkYyRzWJOyd9PB40ruWxN46nXbEpWXQe0ada5J1zFxJo_8dMTs6UkH8MDwSIxOqIbmznzBW_nvO8DOPnvQCSjQ95yYqci0pdLladlsGQ-fJ6XmLmPG7mQ3ZcjmgIKvpbTXcX_6W0REgVWNr3-tZWv8mN1NANL64QXCD14Uj-uHW9dxGsf_WixFELbBLQGmaUSZgRQ"
+		}
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "IdentityURL",
+			"value": ""
+		},
+		{
+			"key": "UserApiPrefix",
+			"value": ""
+		},
+		{
+			"key": "GroupApiPrefix",
+			"value": ""
+		},
+		{
+			"key": "PermissionApiPrefix",
+			"value": ""
+		}
+	]
+}

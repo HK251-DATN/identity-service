@@ -16,9 +16,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.hcmut.datn.identity_service.dao.Group;
+import edu.hcmut.datn.identity_service.dao.GroupPermission;
 import edu.hcmut.datn.identity_service.dao.Permission;
 import edu.hcmut.datn.identity_service.dao.User;
+import edu.hcmut.datn.identity_service.dto.misc.PermissionBasicView;
+import edu.hcmut.datn.identity_service.dto.misc.UserBasicView;
+import edu.hcmut.datn.identity_service.dto.request.GroupPermissionDTO;
 import edu.hcmut.datn.identity_service.dto.request.GroupRequest;
+import edu.hcmut.datn.identity_service.dto.request.UserGroupDTO;
 import edu.hcmut.datn.identity_service.dto.response.ApiResponse;
 import edu.hcmut.datn.identity_service.service.GroupService;
 
@@ -94,11 +99,86 @@ public class GroupController {
         return ResponseEntity.ok().body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Delete success", null));
     }
 
-    public ResponseEntity<ApiResponse<List<User>>> getUsers() {
-        return null;
+    @GetMapping("/{groupId}/user")
+    public ResponseEntity<ApiResponse<List<UserBasicView>>> getUsers(@PathVariable Long groupId) {
+        List<UserBasicView> results = groupService.getUser(groupId);
+
+        if (results.isEmpty()) {
+            return ResponseEntity.ok().body(ApiResponse.SKIP_AS_GOOD(HttpStatus.OK.toString(), "No users found", null));
+        }
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Get users in group success", results));
     }
 
-    public ResponseEntity<ApiResponse<List<Permission>>> getPermissions() {
-        return null;
+    @PostMapping("/{groupId}/user")
+    public ResponseEntity<ApiResponse<List<User>>> addUser(@RequestBody UserGroupDTO userGroupDTO) {
+        boolean addUserResult = groupService.addUser(userGroupDTO.getGroupId(), userGroupDTO.getUserId());
+
+        if (!addUserResult) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.ERROR(HttpStatus.BAD_REQUEST.toString(), "Add user fail", null));
+        }
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Add user success", null));
+    }
+
+    @DeleteMapping("/{groupId}/user")
+    public ResponseEntity<ApiResponse<List<User>>> removeUser(@RequestBody UserGroupDTO userGroupDTO) {
+        boolean removeUserFromGroupResult = groupService.removeUser(userGroupDTO.getGroupId(),
+                userGroupDTO.getUserId());
+
+        if (!removeUserFromGroupResult) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.ERROR(HttpStatus.BAD_REQUEST.toString(), "Remove user from group fail", null));
+        }
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Remove user from group success", null));
+    }
+
+    @GetMapping("/{groupId}/permission")
+    public ResponseEntity<ApiResponse<List<PermissionBasicView>>> getPermissions(@PathVariable Long groupId) {
+        List<PermissionBasicView> results = groupService.getPermission(groupId);
+
+        if (results.isEmpty()) {
+            return ResponseEntity.ok()
+                    .body(ApiResponse.SKIP_AS_GOOD(HttpStatus.OK.toString(), "No permissions found", null));
+        }
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Get permissions of group success", results));
+    }
+
+    @PostMapping("/{groupId}/permission")
+    public ResponseEntity<ApiResponse<Permission>> grantPermission(
+            @RequestBody GroupPermissionDTO groupPermissionDTO) {
+
+        GroupPermission tempEntity = groupPermissionDTO.toEntity();
+
+        if (!groupService.grantPermission(tempEntity)) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.ERROR(HttpStatus.BAD_REQUEST.toString(), "Grant permission to group fail",
+                            null));
+        }
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Grant permission to group success", null));
+    }
+
+    @DeleteMapping("/{groupId}/permission")
+    public ResponseEntity<ApiResponse<Permission>> revokePermission(
+            @RequestBody GroupPermissionDTO groupPermissionDTO) {
+        // GroupPermission tempEntity = groupPermissionDTO.toEntity();
+
+        if (!groupService.revokePermission(groupPermissionDTO)) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.ERROR(HttpStatus.BAD_REQUEST.toString(), "Revoke permission of group fail",
+                            null));
+        }
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Revoke permission of group success", null));
     }
 }

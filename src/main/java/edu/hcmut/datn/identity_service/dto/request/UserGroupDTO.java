@@ -1,8 +1,11 @@
 package edu.hcmut.datn.identity_service.dto.request;
 
 import edu.hcmut.datn.identity_service.dao.UserGroup;
+import lombok.Data;
 
+@Data
 public class UserGroupDTO {
+
     private long userId;
 
     private long groupId;

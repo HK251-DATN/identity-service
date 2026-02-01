@@ -36,15 +36,15 @@ public class UserGroup {
     @Getter
     private boolean isActive;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "added_at", nullable = false, updatable = false)
+    private LocalDateTime addedAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @PrePersist
     public void prePersist() {
-        createdAt = LocalDateTime.now();
+        addedAt = LocalDateTime.now();
     }
 
     @PreUpdate

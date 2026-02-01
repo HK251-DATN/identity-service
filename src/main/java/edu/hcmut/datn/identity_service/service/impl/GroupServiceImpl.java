@@ -10,7 +10,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import edu.hcmut.datn.identity_service.dao.Group;
+import edu.hcmut.datn.identity_service.dao.GroupPermission;
+import edu.hcmut.datn.identity_service.dao.UserGroup;
+import edu.hcmut.datn.identity_service.dto.misc.PermissionBasicView;
+import edu.hcmut.datn.identity_service.dto.misc.UserBasicView;
+import edu.hcmut.datn.identity_service.dto.request.GroupPermissionDTO;
+import edu.hcmut.datn.identity_service.repository.GroupPermissionRepository;
 import edu.hcmut.datn.identity_service.repository.GroupRepository;
+import edu.hcmut.datn.identity_service.repository.UserGroupRepository;
 import edu.hcmut.datn.identity_service.service.GroupService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -20,6 +27,12 @@ public class GroupServiceImpl implements GroupService {
 
     @Autowired
     private GroupRepository groupRepository;
+
+    @Autowired
+    private UserGroupRepository userGroupRepository;
+
+    @Autowired
+    private GroupPermissionRepository groupPermissionRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -91,5 +104,81 @@ public class GroupServiceImpl implements GroupService {
             // TODO: Log the exception
             return false;
         }
+    }
+
+    @Override
+    public boolean addUser(Long groupId, Long userId) {
+        if (userGroupRepository.existsByUserIdAndGroupId(userId, groupId)) {
+            return false;
+        }
+
+        UserGroup newUserGroup = new UserGroup();
+
+        newUserGroup.setUserId(userId);
+        newUserGroup.setGroupId(groupId);
+        newUserGroup.setActive(true);
+
+        userGroupRepository.save(newUserGroup);
+
+        return true;
+    }
+
+    @Override
+    public List<UserBasicView> getUser(Long groupId) {
+        return userGroupRepository.getUserBelongToGroup(groupId);
+    }
+
+    @Override
+    public boolean removeUser(Long groupId, Long userId) {
+        if (userGroupRepository.existsByUserIdAndGroupId(userId, groupId)) {
+            userGroupRepository.deleteUserFromGroup(userId, groupId);
+            return true;
+        }
+
+        // TODO: Log error
+        return false;
+    }
+
+    @Override
+    public boolean grantPermission(GroupPermission groupPermission) {
+        if (groupPermissionRepository.existsByPerIdAndGroupId(groupPermission.getPerId(),
+                groupPermission.getGroupId())) {
+            // TODO: Log error
+            return false;
+        }
+
+        groupPermissionRepository.save(groupPermission);
+        return true;
+    }
+
+    @Override
+    public List<PermissionBasicView> getPermission(Long groupId) {
+        return groupPermissionRepository.getGroupPermissions(groupId);
+    }
+
+    @Override
+    public boolean revokePermission(GroupPermission groupPermission) {
+        if (!groupPermissionRepository.existsByPerIdAndGroupId(groupPermission.getPerId(),
+                groupPermission.getGroupId())) {
+            // TODO: Log error
+            return false;
+        }
+
+        groupPermissionRepository.deleteByPerIdAndGroupId(groupPermission.getPerId(),
+                groupPermission.getGroupId());
+        return true;
+    }
+
+    @Override
+    public boolean revokePermission(GroupPermissionDTO groupPermissionDTO) {
+        if (!groupPermissionRepository.existsByPerIdAndGroupId(groupPermissionDTO.getPerId(),
+                groupPermissionDTO.getGroupId())) {
+            // TODO: Log error
+            return false;
+        }
+
+        groupPermissionRepository.deleteByPerIdAndGroupId(groupPermissionDTO.getPerId(),
+                groupPermissionDTO.getGroupId());
+        return true;
     }
 }
