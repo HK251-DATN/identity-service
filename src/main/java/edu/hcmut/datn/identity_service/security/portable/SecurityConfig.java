@@ -1,4 +1,4 @@
-package edu.hcmut.datn.identity_service.security;
+package edu.hcmut.datn.identity_service.security.portable;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -11,8 +11,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import edu.hcmut.datn.identity_service.security.jwt.JwtAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {

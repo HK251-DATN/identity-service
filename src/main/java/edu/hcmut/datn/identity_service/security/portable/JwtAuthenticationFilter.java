@@ -1,4 +1,4 @@
-package edu.hcmut.datn.identity_service.security.jwt;
+package edu.hcmut.datn.identity_service.security.portable;
 
 import java.io.IOException;
 import java.util.List;
@@ -20,7 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
-    private JwtService jwtService;
+    private JwtTokenValidator jwtTokenValidator;
 
     @Override
     protected void doFilterInternal(
@@ -39,10 +39,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             try {
-                Claims claims = jwtService.validateToken(token).getBody();
+                Claims claims = jwtTokenValidator.validateToken(token).getBody();
 
                 @SuppressWarnings("unchecked")
                 List<String> permissions = (List<String>) claims.get("permissions");
+                Long requesterId = claims.get("userId", Long.class);
+                String requesterEmail = claims.get("userEmail", String.class);
 
                 List<SimpleGrantedAuthority> authorities = List.of();
 
@@ -50,10 +52,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authorities = permissions.stream().map(SimpleGrantedAuthority::new).toList();
                 }
 
-                System.out.println("DEBUG: " + claims.toString());
+                AuthenticatedUser requester = new AuthenticatedUser(requesterId, requesterEmail);
+
+                System.out.println("DEBUG: authorities" + authorities.toString());
+
+                System.out.println("DEBUG: requester" + requester.toString());
 
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        claims.getSubject(), null, authorities);
+                        requester, null, authorities);
 
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
@@ -66,5 +72,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
-
 }

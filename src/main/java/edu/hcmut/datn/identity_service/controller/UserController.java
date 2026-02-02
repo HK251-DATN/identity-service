@@ -6,6 +6,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,10 +23,11 @@ import edu.hcmut.datn.identity_service.dto.misc.GroupBasicView;
 import edu.hcmut.datn.identity_service.dto.misc.PermissionBasicView;
 import edu.hcmut.datn.identity_service.dto.request.UserRequest;
 import edu.hcmut.datn.identity_service.dto.response.ApiResponse;
-import edu.hcmut.datn.identity_service.security.jwt.JwtService;
+import edu.hcmut.datn.identity_service.security.jwt.JwtTokenGenerator;
 import edu.hcmut.datn.identity_service.service.UserService;
 
 @RestController
+@EnableMethodSecurity
 @RequestMapping("/api/user")
 public class UserController {
 
@@ -32,7 +35,7 @@ public class UserController {
     private UserService userService;
 
     @Autowired
-    private JwtService jwtService;
+    private JwtTokenGenerator jwtTokenGenerator;
 
     @PostMapping
     public ResponseEntity<ApiResponse<User>> create(@RequestBody UserRequest userRequest) {
@@ -58,7 +61,7 @@ public class UserController {
 
         User curUser = userService.getByEmail(userRequest.getEmail());
 
-        String token = jwtService.generateToken(curUser);
+        String token = jwtTokenGenerator.generateToken(curUser);
 
         Map<String, String> result = Map.of("accessToken", token);
 
@@ -66,6 +69,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('USER_VIEW') or #id == principal.id")
     public ResponseEntity<ApiResponse<User>> getById(@PathVariable Long id) {
         User getResult = userService.get(id);
 
