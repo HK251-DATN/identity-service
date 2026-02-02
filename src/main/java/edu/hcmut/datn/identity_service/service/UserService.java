@@ -14,6 +14,8 @@ public interface UserService {
 
     User get(Long id);
 
+    User getByEmail(String email);
+
     User update(Long id, User user);
 
     Boolean delete(Long id);
@@ -23,4 +25,6 @@ public interface UserService {
     List<PermissionBasicView> getUserPermissions(Long userId);
 
     List<GroupBasicView> getUserGroups(Long userId);
+
+    List<String> getUserPermissionsList(Long userId);
 }

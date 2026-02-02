@@ -1,5 +1,6 @@
 package edu.hcmut.datn.identity_service.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,6 +70,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getByEmail(String email) {
+        return userRepository.findByUserEmail(email).orElse(null);
+    }
+
+    @Override
     public User update(Long id, User user) {
         try {
             Optional<User> curUser = userRepository.findById(id);
@@ -114,6 +120,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<GroupBasicView> getUserGroups(Long userId) {
         return userRepository.getUserGroups(userId);
+    }
+
+    @Override
+    public List<String> getUserPermissionsList(Long userId) {
+        List<PermissionBasicView> permissionBasics = getUserPermissions(userId);
+
+        List<String> results = new ArrayList<>();
+
+        for (int idx = 0; idx < permissionBasics.size(); idx++) {
+            results.add(permissionBasics.get(idx).getPerCode());
+        }
+
+        return results;
     }
 
 }

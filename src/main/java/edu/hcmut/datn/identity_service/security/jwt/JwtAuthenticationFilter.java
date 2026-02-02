@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -37,12 +38,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 token = token.substring(7);
             }
 
-            Claims claims = jwtService.validateToken(token).getBody();
+            try {
+                Claims claims = jwtService.validateToken(token).getBody();
 
-            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                    claims.getSubject(), null, List.of());
+                @SuppressWarnings("unchecked")
+                List<String> permissions = (List<String>) claims.get("permissions");
 
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                List<SimpleGrantedAuthority> authorities = List.of();
+
+                if (permissions != null) {
+                    authorities = permissions.stream().map(SimpleGrantedAuthority::new).toList();
+                }
+
+                System.out.println("DEBUG: " + claims.toString());
+
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                        claims.getSubject(), null, authorities);
+
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
+            } catch (Exception e) {
+                SecurityContextHolder.clearContext();
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
         }
 
         filterChain.doFilter(request, response);

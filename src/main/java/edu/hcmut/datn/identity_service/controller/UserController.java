@@ -56,7 +56,9 @@ public class UserController {
                     .body(ApiResponse.ERROR(HttpStatus.BAD_REQUEST.toString(), "Invalid credential", null));
         }
 
-        String token = jwtService.generateToken(userRequest.toEntity());
+        User curUser = userService.getByEmail(userRequest.getEmail());
+
+        String token = jwtService.generateToken(curUser);
 
         Map<String, String> result = Map.of("accessToken", token);
 
