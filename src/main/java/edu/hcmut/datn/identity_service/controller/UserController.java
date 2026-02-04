@@ -36,7 +36,6 @@ public class UserController {
     private JwtTokenGenerator jwtTokenGenerator;
 
     @PostMapping
-    @PreAuthorize("permitAll()")
     public ResponseEntity<ApiResponse<User>> create(@RequestBody UserRequest userRequest) {
         User createResult = userService.create(userRequest.toEntity());
 
@@ -50,7 +49,6 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    @PreAuthorize("permitAll()")
     public ResponseEntity<ApiResponse<Map<String, String>>> login(@RequestBody UserRequest userRequest) {
         Boolean loginResult = userService.authenticate(userRequest.getEmail(), userRequest.getPassword());
 
@@ -125,7 +123,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/group")
-    @PreAuthorize("hasAuthority('GROUP_MANAGE')")
+    @PreAuthorize("hasAuthority('GROUP_MANAGE') or #userId == principal.id")
     public ResponseEntity<ApiResponse<List<GroupBasicView>>> getGroups(@PathVariable Long userId) {
         List<GroupBasicView> results = userService.getUserGroups(userId);
 
