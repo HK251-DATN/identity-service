@@ -60,18 +60,20 @@
 
 Để tái sử dụng cơ chế kiểm tra JWT từ Identity Service trong các service khác, làm theo các bước sau:
 
-1. Thêm các file mã nguồn (copy từ dự án này) vào package tương ứng trong service nhận:
-   - main/java/edu/hcmut/datn/identity_service/security/portable/AuthenticatedUser.java
-   - main/java/edu/hcmut/datn/identity_service/security/portable/JwtAuthenticationFilter.java
-   - main/java/edu/hcmut/datn/identity_service/security/portable/JwtTokenValidator.java
-   - main/java/edu/hcmut/datn/identity_service/security/portable/SecurityConfig.java
+### Thêm các file mã nguồn (copy từ dự án này) vào package tương ứng trong service nhận
 
-   Lưu ý: Điều chỉnh package và cấu hình nếu namespace của service khác.
+- main/java/edu/hcmut/datn/identity_service/security/portable/AuthenticatedUser.java
+- main/java/edu/hcmut/datn/identity_service/security/portable/JwtAuthenticationFilter.java
+- main/java/edu/hcmut/datn/identity_service/security/portable/JwtTokenValidator.java
+- main/java/edu/hcmut/datn/identity_service/security/portable/SecurityConfig.java
 
-2. Thêm file public.pem (khóa công khai) vào:
-   - `src/main/resources/keys/public.pem`
+Lưu ý: Điều chỉnh package và cấu hình nếu namespace của service khác.
 
-3. Thêm các dependency cần thiết vào pom.xml của service nhận (ví dụ chung, phiên bản tùy thuộc BOM của Spring Boot):
+### Thêm file public.pem (khóa công khai) vào
+
+- `src/main/resources/keys/public.pem`
+
+### Thêm các dependency cần thiết vào pom.xml của service nhận (ví dụ chung, phiên bản tùy thuộc BOM của Spring Boot)
 
 ```xml
 <!-- pom.xml - dependencies -->
@@ -95,9 +97,35 @@
   <artifactId>jjwt-jackson</artifactId>
   <scope>runtime</scope>
 </dependency>
-
-4. Kiểm tra và cấu hình:
-   - Đảm bảo SecurityConfig được load (hoặc import) trong ứng dụng.
-   - Chạy test xác thực bằng token JWT được cấp từ hệ thống (Identity Service) để xác thực hoạt động.
-   - Chạy `mvn clean package` và kiểm tra logs để xác nhận filter/load key thành công.
 ```
+
+### Dùng @PreAuthorize (SpEL) trước các mapping để kiểm tra quyền và so sánh id requester
+
+```java
+@GetMapping("/{id}")
+@PreAuthorize("hasAuthority('USER_VIEW') or #id == principal.id")
+public ResponseEntity<?> getById(@PathVariable Long id) { ... }
+```
+
+### Có thể inject principal trực tiếp bằng @AuthenticationPrincipal để lấy thông tin requester (id, authorities, ...)
+
+```java
+@GetMapping("/me")
+@PreAuthorize("isAuthenticated()")
+public ResponseEntity<?> me(@AuthenticationPrincipal AuthenticatedUser principal) {
+    Long requesterId = principal.getId();
+    // truy xuất permissions: principal.getAuthorities()
+    // ...existing code...
+}
+```
+
+### Ghi chú
+
+- Biểu thức SpEL `principal` dùng để truy cập đối tượng principal (ở đây class AuthenticatedUser trong project).
+- @AuthenticationPrincipal tiện khi cần dữ liệu requester trong body method thay vì dùng biểu thức SpEL.
+
+## Tài liệu tham khảo
+
+- Method security (EnableMethodSecurity, @PreAuthorize): <https://docs.spring.io/spring-security/reference/servlet/authorization/method-security/>
+- Expression-based access control / principal: <https://docs.spring.io/spring-security/reference/servlet/authorization/expression-based.html>
+- @AuthenticationPrincipal: <https://docs.spring.io/spring-security/reference/servlet/authentication/principal.html>

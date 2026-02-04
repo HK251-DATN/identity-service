@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,7 +26,6 @@ import edu.hcmut.datn.identity_service.security.jwt.JwtTokenGenerator;
 import edu.hcmut.datn.identity_service.service.UserService;
 
 @RestController
-@EnableMethodSecurity
 @RequestMapping("/api/user")
 public class UserController {
 
@@ -38,6 +36,7 @@ public class UserController {
     private JwtTokenGenerator jwtTokenGenerator;
 
     @PostMapping
+    @PreAuthorize("permitAll()")
     public ResponseEntity<ApiResponse<User>> create(@RequestBody UserRequest userRequest) {
         User createResult = userService.create(userRequest.toEntity());
 
@@ -51,6 +50,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<ApiResponse<Map<String, String>>> login(@RequestBody UserRequest userRequest) {
         Boolean loginResult = userService.authenticate(userRequest.getEmail(), userRequest.getPassword());
 
@@ -82,6 +82,7 @@ public class UserController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('USER_VIEW')")
     public ResponseEntity<ApiResponse<List<User>>> getAll(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "20") Integer pageSize) {
@@ -95,6 +96,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('USER_UPDATE') or #id == principal.id")
     public ResponseEntity<ApiResponse<User>> update(
             @PathVariable Long id,
             @RequestBody UserRequest userRequest) {
@@ -110,6 +112,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('USER_DELETE') or #id == principal.id")
     public ResponseEntity<ApiResponse<User>> delete(@PathVariable Long id) {
         Boolean deleteResult = userService.delete(id);
 
@@ -122,6 +125,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/group")
+    @PreAuthorize("hasAuthority('GROUP_MANAGE')")
     public ResponseEntity<ApiResponse<List<GroupBasicView>>> getGroups(@PathVariable Long userId) {
         List<GroupBasicView> results = userService.getUserGroups(userId);
 
@@ -135,6 +139,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/permission")
+    @PreAuthorize("hasAuthority('USER_VIEW') and hasAuthority('PERMISSION_VIEW')")
     public ResponseEntity<ApiResponse<List<PermissionBasicView>>> getPermissions(@PathVariable Long userId) {
         List<PermissionBasicView> results = userService.getUserPermissions(userId);
 

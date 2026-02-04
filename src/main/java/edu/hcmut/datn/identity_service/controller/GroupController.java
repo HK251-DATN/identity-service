@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +29,7 @@ import edu.hcmut.datn.identity_service.dto.response.ApiResponse;
 import edu.hcmut.datn.identity_service.service.GroupService;
 
 @RestController
+@PreAuthorize("hasAuthority('GROUP_MANAGE')")
 @RequestMapping("/api/group")
 public class GroupController {
 
@@ -151,6 +153,7 @@ public class GroupController {
                 .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Get permissions of group success", results));
     }
 
+    @PreAuthorize("hasAuthority('PERMISSION_MANAGE')")
     @PostMapping("/{groupId}/permission")
     public ResponseEntity<ApiResponse<Permission>> grantPermission(
             @RequestBody GroupPermissionDTO groupPermissionDTO) {
@@ -167,6 +170,7 @@ public class GroupController {
                 .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Grant permission to group success", null));
     }
 
+    @PreAuthorize("hasAuthority('PERMISSION_MANAGE')")
     @DeleteMapping("/{groupId}/permission")
     public ResponseEntity<ApiResponse<Permission>> revokePermission(
             @RequestBody GroupPermissionDTO groupPermissionDTO) {

@@ -235,7 +235,7 @@ COPY public.permissions (per_id, per_code, per_name, per_des, is_active, created
 5	GROUP_VIEW	View groups	View user groups	t	2026-02-01 09:58:51.623872	\N
 6	GROUP_MANAGE	Manage groups	Create, update, delete groups	t	2026-02-01 09:58:51.623872	\N
 7	PERMISSION_VIEW	View permissions	View permission list	t	2026-02-01 09:58:51.623872	\N
-8	PERMISSION_ASSIGN	Assign permissions	Assign permissions to groups	t	2026-02-01 09:58:51.623872	\N
+8	PERMISSION_MANAGE	Manage permissions	CRUD permission and grant-revoke permission to groups	t	2026-02-01 09:58:51.623872	\N
 9	ORDER_VIEW	View orders	View order information	t	2026-02-01 09:58:51.623872	\N
 10	ORDER_MANAGE	Manage orders	Create, update, cancel orders	t	2026-02-01 09:58:51.623872	\N
 11	PRODUCT_VIEW	View products	View product catalog	t	2026-02-01 09:58:51.623872	\N
