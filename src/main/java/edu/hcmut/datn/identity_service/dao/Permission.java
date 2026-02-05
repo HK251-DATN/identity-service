@@ -20,6 +20,7 @@ public class Permission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "per_id")
+    @Getter
     private long perId;
 
     @Column(name = "per_code")

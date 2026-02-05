@@ -80,7 +80,7 @@ public class UserServiceImpl implements UserService {
             Optional<User> curUser = userRepository.findById(id);
             if (curUser.isPresent()) {
                 curUser.get().setUserEmail(user.getUserEmail());
-                curUser.get().setHashedPwd(user.getHashedPwd());
+                curUser.get().setHashedPwd(passwordEncoder.encode(user.getHashedPwd()));
                 return userRepository.save(curUser.get());
             } else {
                 throw new RuntimeException("User not found");

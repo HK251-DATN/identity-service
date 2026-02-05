@@ -41,8 +41,8 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public Permission get(Long perId) {
         try {
-            if (permissionRepository.existsById(perId)) {
-                throw new RuntimeException("Duplicated permission");
+            if (permissionRepository.findById(perId).isEmpty()) {
+                throw new RuntimeException("Permission not found");
             } else {
                 return permissionRepository.findById(perId).get();
             }
