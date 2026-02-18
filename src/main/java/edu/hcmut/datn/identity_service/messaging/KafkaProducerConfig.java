@@ -14,7 +14,7 @@ import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JacksonJsonSerializer;
 
 @Configuration
-public class KafkaConfig {
+public class KafkaProducerConfig {
 
     @Value("${app.kafka-url}")
     private String kafkaUrl;
@@ -22,22 +22,27 @@ public class KafkaConfig {
     @Bean
     public ProducerFactory<String, Object> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
+
         configProps.put(
-            ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
-            kafkaUrl
-        );
+                ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
+                kafkaUrl);
+
         configProps.put(
-            ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-            StringSerializer.class
-        );
+                ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+                StringSerializer.class);
+
         configProps.put(
-            ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-            JacksonJsonSerializer.class
-        );
+                ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+                JacksonJsonSerializer.class);
+
         configProps.put(ProducerConfig.ACKS_CONFIG, "all");
+
         configProps.put(ProducerConfig.RETRIES_CONFIG, 3);
+
         configProps.put(ProducerConfig.LINGER_MS_CONFIG, 5);
+
         configProps.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
+
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
