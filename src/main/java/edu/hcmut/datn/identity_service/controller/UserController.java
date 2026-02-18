@@ -3,7 +3,6 @@ package edu.hcmut.datn.identity_service.controller;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,20 +19,24 @@ import org.springframework.web.bind.annotation.RestController;
 import edu.hcmut.datn.identity_service.dao.User;
 import edu.hcmut.datn.identity_service.dto.misc.GroupBasicView;
 import edu.hcmut.datn.identity_service.dto.misc.PermissionBasicView;
+import edu.hcmut.datn.identity_service.dto.request.UserRegistrationRequest;
 import edu.hcmut.datn.identity_service.dto.request.UserRequest;
 import edu.hcmut.datn.identity_service.dto.response.ApiResponse;
+import edu.hcmut.datn.identity_service.messaging.user.UserEventProducer;
 import edu.hcmut.datn.identity_service.security.jwt.JwtTokenGenerator;
 import edu.hcmut.datn.identity_service.service.UserService;
+import lombok.AllArgsConstructor;
 
 @RestController
 @RequestMapping("/api/user")
+@AllArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    private JwtTokenGenerator jwtTokenGenerator;
+    private final JwtTokenGenerator jwtTokenGenerator;
+
+    private final UserEventProducer userEventProducer;
 
     @PostMapping
     public ResponseEntity<ApiResponse<User>> create(@RequestBody UserRequest userRequest) {
@@ -148,5 +151,18 @@ public class UserController {
 
         return ResponseEntity.ok()
                 .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Get user's permissions success", results));
+    }
+
+    @PostMapping("/registration")
+    public ResponseEntity<ApiResponse<User>> registrate(@RequestBody UserRegistrationRequest request) {
+        User createResult = userService.create(request);
+
+        if (createResult == null) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.ERROR(HttpStatus.BAD_REQUEST.toString(), "Create user failed", null));
+        }
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Create user success", createResult));
     }
 }

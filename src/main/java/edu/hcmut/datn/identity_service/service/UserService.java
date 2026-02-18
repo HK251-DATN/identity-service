@@ -5,10 +5,13 @@ import java.util.List;
 import edu.hcmut.datn.identity_service.dao.User;
 import edu.hcmut.datn.identity_service.dto.misc.GroupBasicView;
 import edu.hcmut.datn.identity_service.dto.misc.PermissionBasicView;
+import edu.hcmut.datn.identity_service.dto.request.UserRegistrationRequest;
 
 public interface UserService {
 
     User create(User user);
+
+    User create(UserRegistrationRequest request);
 
     List<User> getAll(Integer page, Integer pageSize);
 

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,24 +13,31 @@ import org.springframework.stereotype.Service;
 import edu.hcmut.datn.identity_service.dao.User;
 import edu.hcmut.datn.identity_service.dto.misc.GroupBasicView;
 import edu.hcmut.datn.identity_service.dto.misc.PermissionBasicView;
+import edu.hcmut.datn.identity_service.dto.request.UserRegistrationRequest;
+import edu.hcmut.datn.identity_service.messaging.user.UserCreatedEvent;
+import edu.hcmut.datn.identity_service.messaging.user.UserEventProducer;
 import edu.hcmut.datn.identity_service.repository.UserRepository;
 import edu.hcmut.datn.identity_service.service.UserService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 
 @Service
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     @PersistenceContext
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
+
+    private final UserEventProducer userEventProducer;
 
     @Override
+    @Transactional
     public User create(User user) {
         try {
             Optional<User> curUser = userRepository.findByUserEmail(user.getUserEmail());
@@ -45,6 +51,19 @@ public class UserServiceImpl implements UserService {
             // TODO: Log the exception
             return null;
         }
+    }
+
+    @Override
+    public User create(UserRegistrationRequest request) {
+        User newUser = create(request.toUserRequest().toEntity());
+
+        if (newUser != null) {
+            UserCreatedEvent event = new UserCreatedEvent(newUser.getUserId(), request.getEmail(), request.getFName(), request.getLName(), request.getAvtUrl(), request.getDob(), request.getPNum(), request.getGender());
+
+            userEventProducer.publishUserCreated(event);
+        }
+
+        return newUser;
     }
 
     @Override
