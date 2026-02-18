@@ -1,3 +1,27 @@
+# LOCAL MACHINE
 spring:
   application:
     name: identity_service
+  datasource:
+    url: jdbc:postgresql://192.168.0.200:5432/identity_db
+    username: khoidev
+    password: khoicktv
+  security:
+    user:
+      name: admin
+      password: admin
+
+# BOSCH MACHINE
+# spring:
+#   application:
+#     name: identity_service
+#   datasource:
+#     url: jdbc:postgresql://127.0.0.1:5432/identity_db
+#     username: khoidev
+#     password: khoicktv
+#   security:
+#     user:
+#       name: admin
+#       password: admin
+server:
+  port: 9000

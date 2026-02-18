@@ -1,4 +1,30 @@
 package edu.hcmut.datn.identity_service.service;
 
-public class UserService {
+import java.util.List;
+
+import edu.hcmut.datn.identity_service.dao.User;
+import edu.hcmut.datn.identity_service.dto.misc.GroupBasicView;
+import edu.hcmut.datn.identity_service.dto.misc.PermissionBasicView;
+
+public interface UserService {
+
+    User create(User user);
+
+    List<User> getAll(Integer page, Integer pageSize);
+
+    User get(Long id);
+
+    User getByEmail(String email);
+
+    User update(Long id, User user);
+
+    Boolean delete(Long id);
+
+    Boolean authenticate(String email, String rawPassword);
+
+    List<PermissionBasicView> getUserPermissions(Long userId);
+
+    List<GroupBasicView> getUserGroups(Long userId);
+
+    List<String> getUserPermissionsList(Long userId);
 }
