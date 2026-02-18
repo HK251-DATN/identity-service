@@ -34,3 +34,9 @@ build/
 
 ### Postgres Data ###
 postgres_data
+
+### Local environment variable ###
+.env
+
+### Log files ###
+**/**/*.log
