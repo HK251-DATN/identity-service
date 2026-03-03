@@ -2,6 +2,8 @@ package edu.hcmut.datn.identity_service.service;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import edu.hcmut.datn.identity_service.dao.User;
 import edu.hcmut.datn.identity_service.dto.misc.GroupBasicView;
 import edu.hcmut.datn.identity_service.dto.misc.PermissionBasicView;
@@ -11,7 +13,7 @@ public interface UserService {
 
     User create(User user);
 
-    User create(UserRegistrationRequest request);
+    User create(UserRegistrationRequest request, MultipartFile avtImage);
 
     List<User> getAll(Integer page, Integer pageSize);
 

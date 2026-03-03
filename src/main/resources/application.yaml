@@ -9,22 +9,16 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
-
-# BOSCH MACHINE
-# spring:
-#   application:
-#     name: identity_service
-#   datasource:
-#     url: jdbc:postgresql://127.0.0.1:5432/identity_db
-#     username: khoidev
-#     password: khoicktv
-#   security:
-#     user:
-#       name: admin
-#       password: admin
 app:
-  kafka-url:
-    ${KAFKA_HOST}:${KAFKA_PORT}
+  kafka-url: ${KAFKA_HOST}:${KAFKA_PORT}
+
+cloudflare:
+  r2:
+    endpoint: https://499bb5ccc0de718e6ef985931d71a03a.r2.cloudflarestorage.com
+    access-key: ${R2_ACCESS_KEY}
+    secret-key: ${R2_SECRET_KEY}
+    bucket: back-office-user-avts
+    region: auto
 
 server:
   port: 9000

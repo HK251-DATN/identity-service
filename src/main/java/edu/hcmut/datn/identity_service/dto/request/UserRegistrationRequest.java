@@ -20,9 +20,6 @@ public class UserRegistrationRequest {
     private String lName;
 
     @Getter
-    private String avtUrl;
-
-    @Getter
     private LocalDate dob;
 
     @Getter

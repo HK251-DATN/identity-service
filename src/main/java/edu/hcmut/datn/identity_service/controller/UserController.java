@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import edu.hcmut.datn.identity_service.dao.User;
 import edu.hcmut.datn.identity_service.dto.misc.GroupBasicView;
@@ -24,6 +25,7 @@ import edu.hcmut.datn.identity_service.dto.request.UserRequest;
 import edu.hcmut.datn.identity_service.dto.response.ApiResponse;
 import edu.hcmut.datn.identity_service.messaging.user.UserEventProducer;
 import edu.hcmut.datn.identity_service.security.jwt.JwtTokenGenerator;
+import edu.hcmut.datn.identity_service.service.R2UploadService;
 import edu.hcmut.datn.identity_service.service.UserService;
 import lombok.AllArgsConstructor;
 
@@ -33,6 +35,8 @@ import lombok.AllArgsConstructor;
 public class UserController {
 
     private final UserService userService;
+
+    private final R2UploadService r2UploadService;
 
     private final JwtTokenGenerator jwtTokenGenerator;
 
@@ -154,8 +158,10 @@ public class UserController {
     }
 
     @PostMapping("/registration")
-    public ResponseEntity<ApiResponse<User>> registrate(@RequestBody UserRegistrationRequest request) {
-        User createResult = userService.create(request);
+    public ResponseEntity<ApiResponse<User>> registrate(
+            @RequestBody UserRegistrationRequest request,
+            @RequestParam("file") MultipartFile avtImage) {
+        User createResult = userService.create(request, avtImage);
 
         if (createResult == null) {
             return ResponseEntity.badRequest()
@@ -165,4 +171,13 @@ public class UserController {
         return ResponseEntity.ok()
                 .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Create user success", createResult));
     }
+
+    @PostMapping("/upload-avt-img")
+    public ResponseEntity<ApiResponse<Void>> uploadAvtImg(@RequestParam("file") MultipartFile avtImage) {
+        r2UploadService.upload(avtImage);
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Create user success", null));
+    }
+
 }

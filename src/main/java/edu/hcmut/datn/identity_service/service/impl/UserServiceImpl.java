@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import edu.hcmut.datn.identity_service.dao.User;
 import edu.hcmut.datn.identity_service.dto.misc.GroupBasicView;
@@ -17,6 +18,7 @@ import edu.hcmut.datn.identity_service.dto.request.UserRegistrationRequest;
 import edu.hcmut.datn.identity_service.messaging.user.UserCreatedEvent;
 import edu.hcmut.datn.identity_service.messaging.user.UserEventProducer;
 import edu.hcmut.datn.identity_service.repository.UserRepository;
+import edu.hcmut.datn.identity_service.service.R2UploadService;
 import edu.hcmut.datn.identity_service.service.UserService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -30,6 +32,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final R2UploadService r2UploadService;
 
     @PersistenceContext
     private final EntityManager entityManager;
@@ -54,11 +58,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User create(UserRegistrationRequest request) {
+    public User create(UserRegistrationRequest request, MultipartFile avtImage) {
         User newUser = create(request.toUserRequest().toEntity());
 
+        String userAvtUrl;
+
+        try {
+            userAvtUrl = r2UploadService.upload(avtImage);
+        } catch (Exception e) {
+            userAvtUrl = null;
+        }
+
         if (newUser != null) {
-            UserCreatedEvent event = new UserCreatedEvent(newUser.getUserId(), request.getEmail(), request.getFName(), request.getLName(), request.getAvtUrl(), request.getDob(), request.getPNum(), request.getGender());
+            UserCreatedEvent event = new UserCreatedEvent(newUser.getUserId(), request.getEmail(), request.getFName(),
+                    request.getLName(),
+                    userAvtUrl, request.getDob(), request.getPNum(), request.getGender());
 
             userEventProducer.publishUserCreated(event);
         }
