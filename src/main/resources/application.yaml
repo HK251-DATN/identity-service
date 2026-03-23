@@ -8,8 +8,8 @@ spring:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/identity_db
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-#  mvc:
-#    log-request-details: true
+  mvc:
+    log-request-details: true
 
 app:
   kafka-url: ${KAFKA_HOST}:${KAFKA_PORT}
@@ -25,8 +25,8 @@ cloudflare:
 server:
   port: 9000
 
-#logging:
-#  level:
-#    org.springframework.web: DEBUG
-#    org.springframework.security: DEBUG
-#    web: DEBUG
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+    web: DEBUG
