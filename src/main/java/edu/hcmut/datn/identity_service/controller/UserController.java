@@ -1,5 +1,6 @@
 package edu.hcmut.datn.identity_service.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -56,7 +57,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<Map<String, String>>> login(@RequestBody UserRequest userRequest) {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> login(@RequestBody UserRequest userRequest) {
         Boolean loginResult = userService.authenticate(userRequest.getEmail(), userRequest.getPassword());
 
         if (!loginResult) {
@@ -68,7 +69,24 @@ public class UserController {
 
         String token = jwtTokenGenerator.generateToken(curUser);
 
-        Map<String, String> result = Map.of("accessToken", token);
+        List<PermissionBasicView> rawPermissions =  userService.getUserPermissions(curUser.getUserId());
+
+        List<String> permissions = rawPermissions.stream().map(PermissionBasicView::getPerCode).toList();
+
+        List<GroupBasicView> userGroupObjs = userService.getUserGroups(curUser.getUserId());
+
+        List<String> roles = userGroupObjs.stream().map(GroupBasicView::getGroupName).toList();
+
+        Map<String, String> userObj = new HashMap<>();
+        userObj.put("id", String.valueOf(curUser.getUserId()));
+        userObj.put("email", curUser.getUserEmail());
+
+        Map<String, Object> result = new HashMap<>();
+
+        result.put("user", userObj);
+        result.put("accessToken", token);
+        result.put("permissions", String.join(",", permissions));
+        result.put("roles", String.join(",", roles));
 
         return ResponseEntity.ok().body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Valid credential", result));
     }
