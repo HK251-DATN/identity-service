@@ -13,7 +13,7 @@ public interface UserService {
 
     User create(User user);
 
-    User create(UserRegistrationRequest request, MultipartFile avtImage);
+    User create(UserRegistrationRequest request);
 
     List<User> getAll(Integer page, Integer pageSize);
 
@@ -32,4 +32,6 @@ public interface UserService {
     List<GroupBasicView> getUserGroups(Long userId);
 
     List<String> getUserPermissionsList(Long userId);
+    
+    void changePassword(Long userId, String oldPassword, String newPassword);
 }

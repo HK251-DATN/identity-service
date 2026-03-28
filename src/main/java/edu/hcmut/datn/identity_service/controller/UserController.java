@@ -3,10 +3,14 @@ package edu.hcmut.datn.identity_service.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
+import edu.hcmut.datn.identity_service.dto.request.UserChangePasswordRequest;
+import edu.hcmut.datn.identity_service.security.portable.AuthenticatedUser;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -175,17 +179,18 @@ public class UserController {
                 .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Get user's permissions success", results));
     }
 
-    @PostMapping("/registration")
-    public ResponseEntity<ApiResponse<User>> registrate(
-            @RequestBody UserRegistrationRequest request,
-            @RequestParam("file") MultipartFile avtImage) {
-        User createResult = userService.create(request, avtImage);
+    @PostMapping("/buyer-register")
+    public ResponseEntity<ApiResponse<User>> register(
+            @RequestBody UserRegistrationRequest request) {
+        User createResult = userService.create(request);
 
         if (createResult == null) {
             return ResponseEntity.badRequest()
                     .body(ApiResponse.ERROR(HttpStatus.BAD_REQUEST.toString(), "Create user failed", null));
         }
-
+        
+        createResult.setHashedPwd("");
+        
         return ResponseEntity.ok()
                 .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Create user success", createResult));
     }
@@ -197,5 +202,28 @@ public class UserController {
         return ResponseEntity.ok()
                 .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Create user success", null));
     }
-
+    
+    @PostMapping("/change-password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @AuthenticationPrincipal AuthenticatedUser principal,
+            @RequestBody UserChangePasswordRequest request
+            )
+    {
+        try {
+            if (Objects.equals(request.getNewPassword(), request.getOldPassword())) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.ERROR(HttpStatus.BAD_REQUEST.toString(), "The new password you provided is identical to your old password", null));
+            }
+            
+            Long userId = principal.getId();
+            
+            userService.changePassword(userId, request.getOldPassword(), request.getNewPassword());
+            
+            return ResponseEntity.ok()
+                    .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Change password successfully", null));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.ERROR(HttpStatus.BAD_REQUEST.toString(), e.getMessage(), null));
+        }
+    }
 }

@@ -9,6 +9,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -21,6 +22,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 @Component
+@Slf4j
 public class JwtTokenGenerator {
     @Autowired
     private UserRepository userRepository;
@@ -31,6 +33,9 @@ public class JwtTokenGenerator {
         List<String> permissions = userRepository.getUserPermissions(user.getUserId()).stream()
                 .map(PermissionBasicView::getPerCode).toList();
 
+        log.info("Time now: {}", Date.from(now));
+        log.info("Token expired at: {}", Date.from(now.plusSeconds(3600 * 24)));
+        
         return Jwts.builder()
                 .setSubject(user.getUserEmail())
                 .setIssuer("identity-service")

@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import edu.hcmut.datn.identity_service.dao.User;
@@ -22,7 +23,6 @@ import edu.hcmut.datn.identity_service.service.R2UploadService;
 import edu.hcmut.datn.identity_service.service.UserService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 @Service
@@ -58,21 +58,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User create(UserRegistrationRequest request, MultipartFile avtImage) {
+    public User create(UserRegistrationRequest request) {
         User newUser = create(request.toUserRequest().toEntity());
-
-        String userAvtUrl;
-
-        try {
-            userAvtUrl = r2UploadService.upload(avtImage);
-        } catch (Exception e) {
-            userAvtUrl = null;
-        }
-
+        
+        String avtUrl = "https://pub-954e99f131cf4cc896de1ad360338682.r2.dev/128c271e-c0a6-433e-bcd1-f3bbc4243401-default-user-avt.png";
+        
         if (newUser != null) {
-            UserCreatedEvent event = new UserCreatedEvent(newUser.getUserId(), request.getEmail(), request.getFName(),
+            UserCreatedEvent event = new UserCreatedEvent(
+                    newUser.getUserId(),
+                    request.getEmail(),
+                    request.getFName(),
                     request.getLName(),
-                    userAvtUrl, request.getDob(), request.getPNum(), request.getGender());
+                    avtUrl,
+                    request.getDob(),
+                    request.getPNum(),
+                    request.getGender()
+            );
 
             userEventProducer.publishUserCreated(event);
         }
@@ -167,5 +168,28 @@ public class UserServiceImpl implements UserService {
 
         return results;
     }
-
+    
+    @Override
+    @Transactional
+    public void changePassword (Long userId, String oldPassword, String newPassword) {
+        boolean isCorrectPassword = true;
+        try {
+            User user = get(userId);
+            
+            isCorrectPassword = authenticate(user.getUserEmail(), oldPassword);
+            
+            if (!isCorrectPassword) {
+                throw new RuntimeException();
+            }
+            
+            user.setHashedPwd(passwordEncoder.encode(newPassword));
+            
+            userRepository.save(user);
+        } catch (Exception e) {
+            if (!isCorrectPassword)
+                throw new RuntimeException("The old password you provided is incorrect!");
+            else
+                throw new RuntimeException("Unexpected error!");
+        }
+    }
 }
