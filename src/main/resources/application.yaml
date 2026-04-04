@@ -10,6 +10,13 @@ spring:
     password: ${DB_PASSWORD}
   mvc:
     log-request-details: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
 
 app:
   kafka-url: ${KAFKA_HOST}:${KAFKA_PORT}
