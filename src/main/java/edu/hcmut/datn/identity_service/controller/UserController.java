@@ -192,7 +192,7 @@ public class UserController {
         createResult.setHashedPwd("");
         
         return ResponseEntity.ok()
-                .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Create user success", createResult));
+                .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Create user successfully", createResult));
     }
 
     @PostMapping("/upload-avt-img")
