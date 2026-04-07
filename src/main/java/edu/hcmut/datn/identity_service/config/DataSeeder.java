@@ -81,12 +81,36 @@ public class DataSeeder {
                 "buyer@gmail.com",
                 encoder.encode("buyer")
             );
-
+            
+            User buyer1 = createUser(
+                    "minh.tran@gmail.com",
+                    encoder.encode("minh.tran")
+            );
+            
+            User buyer2 = createUser(
+                    "huong.le@gmail.com",
+                    encoder.encode("huong.le")
+            );
+            
+            User buyer3 = createUser(
+                    "tuan.pham@gmail.com",
+                    encoder.encode("tuan.pham")
+            );
+            
+            User buyer4 = createUser(
+                    "linh.vo@gmail.com",
+                    encoder.encode("linh.vo")
+            );
+            
             log.info("Seeded {} users", userRepository.count());
 
             // Assign users to groups
             assignUserToGroup(admin, adminGroup);
             assignUserToGroup(buyer, buyerGroup);
+            assignUserToGroup(buyer1, buyerGroup);
+            assignUserToGroup(buyer2, buyerGroup);
+            assignUserToGroup(buyer3, buyerGroup);
+            assignUserToGroup(buyer4, buyerGroup);
 
             log.info("Assigned users to groups");
             log.info("Database seeding completed successfully!");
