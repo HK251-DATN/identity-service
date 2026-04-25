@@ -1,12 +1,16 @@
 package edu.hcmut.datn.identity_service.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import edu.hcmut.datn.identity_service.dto.request.UserChangePasswordRequest;
+import edu.hcmut.datn.identity_service.security.portable.AuthenticatedUser;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,24 +20,32 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import edu.hcmut.datn.identity_service.dao.User;
 import edu.hcmut.datn.identity_service.dto.misc.GroupBasicView;
 import edu.hcmut.datn.identity_service.dto.misc.PermissionBasicView;
+import edu.hcmut.datn.identity_service.dto.request.UserRegistrationRequest;
 import edu.hcmut.datn.identity_service.dto.request.UserRequest;
 import edu.hcmut.datn.identity_service.dto.response.ApiResponse;
+import edu.hcmut.datn.identity_service.messaging.user.UserEventProducer;
 import edu.hcmut.datn.identity_service.security.jwt.JwtTokenGenerator;
+import edu.hcmut.datn.identity_service.service.R2UploadService;
 import edu.hcmut.datn.identity_service.service.UserService;
+import lombok.AllArgsConstructor;
 
 @RestController
 @RequestMapping("/api/user")
+@AllArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    private JwtTokenGenerator jwtTokenGenerator;
+    private final R2UploadService r2UploadService;
+
+    private final JwtTokenGenerator jwtTokenGenerator;
+
+    private final UserEventProducer userEventProducer;
 
     @PostMapping
     public ResponseEntity<ApiResponse<User>> create(@RequestBody UserRequest userRequest) {
@@ -49,7 +61,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<Map<String, String>>> login(@RequestBody UserRequest userRequest) {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> login(@RequestBody UserRequest userRequest) {
         Boolean loginResult = userService.authenticate(userRequest.getEmail(), userRequest.getPassword());
 
         if (!loginResult) {
@@ -61,7 +73,24 @@ public class UserController {
 
         String token = jwtTokenGenerator.generateToken(curUser);
 
-        Map<String, String> result = Map.of("accessToken", token);
+        List<PermissionBasicView> rawPermissions =  userService.getUserPermissions(curUser.getUserId());
+
+        List<String> permissions = rawPermissions.stream().map(PermissionBasicView::getPerCode).toList();
+
+        List<GroupBasicView> userGroupObjs = userService.getUserGroups(curUser.getUserId());
+
+        List<String> roles = userGroupObjs.stream().map(GroupBasicView::getGroupName).toList();
+
+        Map<String, String> userObj = new HashMap<>();
+        userObj.put("id", String.valueOf(curUser.getUserId()));
+        userObj.put("email", curUser.getUserEmail());
+
+        Map<String, Object> result = new HashMap<>();
+
+        result.put("user", userObj);
+        result.put("accessToken", token);
+        result.put("permissions", String.join(",", permissions));
+        result.put("roles", String.join(",", roles));
 
         return ResponseEntity.ok().body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Valid credential", result));
     }
@@ -148,5 +177,53 @@ public class UserController {
 
         return ResponseEntity.ok()
                 .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Get user's permissions success", results));
+    }
+
+    @PostMapping("/buyer-register")
+    public ResponseEntity<ApiResponse<User>> register(
+            @RequestBody UserRegistrationRequest request) {
+        User createResult = userService.create(request);
+
+        if (createResult == null) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.ERROR(HttpStatus.BAD_REQUEST.toString(), "Create user failed", null));
+        }
+        
+        createResult.setHashedPwd("");
+        
+        return ResponseEntity.ok()
+                .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Create user successfully", createResult));
+    }
+
+    @PostMapping("/upload-avt-img")
+    public ResponseEntity<ApiResponse<Void>> uploadAvtImg(@RequestParam("file") MultipartFile avtImage) {
+        r2UploadService.upload(avtImage);
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Create user success", null));
+    }
+    
+    @PostMapping("/change-password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @AuthenticationPrincipal AuthenticatedUser principal,
+            @RequestBody UserChangePasswordRequest request
+            )
+    {
+        try {
+            if (Objects.equals(request.getNewPassword(), request.getOldPassword())) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.ERROR(HttpStatus.BAD_REQUEST.toString(), "The new password you provided is identical to your old password", null));
+            }
+            
+            Long userId = principal.getId();
+            
+            userService.changePassword(userId, request.getOldPassword(), request.getNewPassword());
+            
+            return ResponseEntity.ok()
+                    .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Change password successfully", null));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.ERROR(HttpStatus.BAD_REQUEST.toString(), e.getMessage(), null));
+        }
     }
 }

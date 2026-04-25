@@ -4,34 +4,44 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import edu.hcmut.datn.identity_service.dao.User;
 import edu.hcmut.datn.identity_service.dto.misc.GroupBasicView;
 import edu.hcmut.datn.identity_service.dto.misc.PermissionBasicView;
+import edu.hcmut.datn.identity_service.dto.request.UserRegistrationRequest;
+import edu.hcmut.datn.identity_service.messaging.user.UserCreatedEvent;
+import edu.hcmut.datn.identity_service.messaging.user.UserEventProducer;
 import edu.hcmut.datn.identity_service.repository.UserRepository;
+import edu.hcmut.datn.identity_service.service.R2UploadService;
 import edu.hcmut.datn.identity_service.service.UserService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import lombok.AllArgsConstructor;
 
 @Service
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+
+    private final R2UploadService r2UploadService;
 
     @PersistenceContext
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
+
+    private final UserEventProducer userEventProducer;
 
     @Override
+    @Transactional
     public User create(User user) {
         try {
             Optional<User> curUser = userRepository.findByUserEmail(user.getUserEmail());
@@ -45,6 +55,30 @@ public class UserServiceImpl implements UserService {
             // TODO: Log the exception
             return null;
         }
+    }
+
+    @Override
+    public User create(UserRegistrationRequest request) {
+        User newUser = create(request.toUserRequest().toEntity());
+        
+        String avtUrl = "https://pub-954e99f131cf4cc896de1ad360338682.r2.dev/128c271e-c0a6-433e-bcd1-f3bbc4243401-default-user-avt.png";
+        
+        if (newUser != null) {
+            UserCreatedEvent event = new UserCreatedEvent(
+                    newUser.getUserId(),
+                    request.getEmail(),
+                    request.getFName(),
+                    request.getLName(),
+                    avtUrl,
+                    request.getDob(),
+                    request.getPNum(),
+                    request.getGender()
+            );
+
+            userEventProducer.publishUserCreated(event);
+        }
+
+        return newUser;
     }
 
     @Override
@@ -134,5 +168,28 @@ public class UserServiceImpl implements UserService {
 
         return results;
     }
-
+    
+    @Override
+    @Transactional
+    public void changePassword (Long userId, String oldPassword, String newPassword) {
+        boolean isCorrectPassword = true;
+        try {
+            User user = get(userId);
+            
+            isCorrectPassword = authenticate(user.getUserEmail(), oldPassword);
+            
+            if (!isCorrectPassword) {
+                throw new RuntimeException();
+            }
+            
+            user.setHashedPwd(passwordEncoder.encode(newPassword));
+            
+            userRepository.save(user);
+        } catch (Exception e) {
+            if (!isCorrectPassword)
+                throw new RuntimeException("The old password you provided is incorrect!");
+            else
+                throw new RuntimeException("Unexpected error!");
+        }
+    }
 }

@@ -2,26 +2,38 @@
 spring:
   application:
     name: identity_service
+  config:
+    import: optional:file:.env[.properties]
   datasource:
-    url: jdbc:postgresql://192.168.0.200:5432/identity_db
-    username: khoidev
-    password: khoicktv
-  security:
-    user:
-      name: admin
-      password: admin
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/identity_db
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  mvc:
+    log-request-details: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
 
-# BOSCH MACHINE
-# spring:
-#   application:
-#     name: identity_service
-#   datasource:
-#     url: jdbc:postgresql://127.0.0.1:5432/identity_db
-#     username: khoidev
-#     password: khoicktv
-#   security:
-#     user:
-#       name: admin
-#       password: admin
+app:
+  kafka-url: ${KAFKA_HOST}:${KAFKA_PORT}
+
+cloudflare:
+  r2:
+    endpoint: https://499bb5ccc0de718e6ef985931d71a03a.r2.cloudflarestorage.com
+    access-key: ${R2_ACCESS_KEY}
+    secret-key: ${R2_SECRET_KEY}
+    bucket: back-office-user-avts
+    region: auto
+
 server:
   port: 9000
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+    web: DEBUG
