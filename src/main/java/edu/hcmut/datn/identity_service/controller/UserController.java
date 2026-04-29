@@ -25,6 +25,9 @@ import org.springframework.web.multipart.MultipartFile;
 import edu.hcmut.datn.identity_service.dao.User;
 import edu.hcmut.datn.identity_service.dto.misc.GroupBasicView;
 import edu.hcmut.datn.identity_service.dto.misc.PermissionBasicView;
+import edu.hcmut.datn.identity_service.dto.request.EmployeeRegistrationRequest;
+import edu.hcmut.datn.identity_service.dto.request.ProviderLinkRequest;
+import edu.hcmut.datn.identity_service.dto.request.ProviderRegistrationRequest;
 import edu.hcmut.datn.identity_service.dto.request.UserRegistrationRequest;
 import edu.hcmut.datn.identity_service.dto.request.UserRequest;
 import edu.hcmut.datn.identity_service.dto.response.ApiResponse;
@@ -195,6 +198,22 @@ public class UserController {
                 .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Create user successfully", createResult));
     }
 
+    @PostMapping("/emp-register")
+    public ResponseEntity<ApiResponse<User>> register(
+            @RequestBody EmployeeRegistrationRequest request) {
+        User createResult = userService.create(request);
+
+        if (createResult == null) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.ERROR(HttpStatus.BAD_REQUEST.toString(), "Create user failed", null));
+        }
+
+        createResult.setHashedPwd("");
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Create user successfully", createResult));
+    }
+
     @PostMapping("/upload-avt-img")
     public ResponseEntity<ApiResponse<Void>> uploadAvtImg(@RequestParam("file") MultipartFile avtImage) {
         r2UploadService.upload(avtImage);
@@ -203,6 +222,37 @@ public class UserController {
                 .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Create user success", null));
     }
     
+    @PostMapping("/provider-register")
+    public ResponseEntity<ApiResponse<User>> registerProvider(
+            @RequestBody ProviderRegistrationRequest request) {
+        User createResult = userService.createProvider(request);
+
+        if (createResult == null) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.ERROR(HttpStatus.BAD_REQUEST.toString(), "Create provider account failed", null));
+        }
+
+        createResult.setHashedPwd("");
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Create provider account successfully", createResult));
+    }
+
+    @PostMapping("/provider-link")
+    public ResponseEntity<ApiResponse<Void>> linkProvider(
+            @AuthenticationPrincipal AuthenticatedUser principal,
+            @RequestBody ProviderLinkRequest request) {
+        try {
+            userService.linkProvider(principal.getId(), request);
+
+            return ResponseEntity.ok()
+                    .body(ApiResponse.SUCCESS(HttpStatus.OK.toString(), "Provider linked successfully", null));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.ERROR(HttpStatus.BAD_REQUEST.toString(), e.getMessage(), null));
+        }
+    }
+
     @PostMapping("/change-password")
     public ResponseEntity<ApiResponse<Void>> changePassword(
             @AuthenticationPrincipal AuthenticatedUser principal,
@@ -227,3 +277,4 @@ public class UserController {
         }
     }
 }
+

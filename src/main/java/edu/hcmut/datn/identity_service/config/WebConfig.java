@@ -25,6 +25,7 @@ public class WebConfig {
         config.addAllowedOrigin("http://localhost:5173"); // Alternative port
         config.addAllowedOrigin("http://localhost:3000");
         config.addAllowedOrigin("http://10.194.144.9:3000");
+        config.addAllowedOrigin("http://localhost:5273");
 
         // Allow all headers
         config.addAllowedHeader("*");

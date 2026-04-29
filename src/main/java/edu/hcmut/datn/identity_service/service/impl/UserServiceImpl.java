@@ -15,7 +15,12 @@ import org.springframework.web.multipart.MultipartFile;
 import edu.hcmut.datn.identity_service.dao.User;
 import edu.hcmut.datn.identity_service.dto.misc.GroupBasicView;
 import edu.hcmut.datn.identity_service.dto.misc.PermissionBasicView;
+import edu.hcmut.datn.identity_service.dto.request.EmployeeRegistrationRequest;
+import edu.hcmut.datn.identity_service.dto.request.ProviderLinkRequest;
+import edu.hcmut.datn.identity_service.dto.request.ProviderRegistrationRequest;
 import edu.hcmut.datn.identity_service.dto.request.UserRegistrationRequest;
+import edu.hcmut.datn.identity_service.messaging.user.ProviderCreatedEvent;
+import edu.hcmut.datn.identity_service.messaging.user.EmpCreatedEvent;
 import edu.hcmut.datn.identity_service.messaging.user.UserCreatedEvent;
 import edu.hcmut.datn.identity_service.messaging.user.UserEventProducer;
 import edu.hcmut.datn.identity_service.repository.UserRepository;
@@ -76,6 +81,33 @@ public class UserServiceImpl implements UserService {
             );
 
             userEventProducer.publishUserCreated(event);
+        }
+
+        return newUser;
+    }
+
+    @Override
+    public User create(EmployeeRegistrationRequest request) {
+        User user = new User();
+        user.setUserEmail(request.getEmail());
+        user.setHashedPwd("12345678"); // Default password
+        User newUser = create(user);
+
+        String avtUrl = "https://pub-954e99f131cf4cc896de1ad360338682.r2.dev/128c271e-c0a6-433e-bcd1-f3bbc4243401-default-user-avt.png";
+
+        if (newUser != null) {
+            EmpCreatedEvent event = new EmpCreatedEvent(
+                    newUser.getUserId(),
+                    request.getEmail(),
+                    request.getFName(),
+                    request.getLName(),
+                    avtUrl,
+                    request.getDob(),
+                    request.getPNum(),
+                    request.getGender()
+            );
+
+            userEventProducer.publishEmpCreated(event);
         }
 
         return newUser;
@@ -169,6 +201,55 @@ public class UserServiceImpl implements UserService {
         return results;
     }
     
+    @Override
+    public User createProvider(ProviderRegistrationRequest request) {
+        User newUser = create(request.toUserRequest().toEntity());
+
+        String avtUrl = "https://pub-954e99f131cf4cc896de1ad360338682.r2.dev/128c271e-c0a6-433e-bcd1-f3bbc4243401-default-user-avt.png";
+
+        if (newUser != null) {
+            ProviderCreatedEvent event = new ProviderCreatedEvent(
+                    newUser.getUserId(),
+                    request.getEmail(),
+                    request.getFName(),
+                    request.getLName(),
+                    avtUrl,
+                    request.getDob(),
+                    request.getPNum(),
+                    request.getGender(),
+                    request.getBankId(),
+                    request.getBankNum(),
+                    true
+            );
+            userEventProducer.publishProviderCreated(event);
+        }
+
+        return newUser;
+    }
+
+    @Override
+    public void linkProvider(Long userId, ProviderLinkRequest request) {
+        User user = get(userId);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        ProviderCreatedEvent event = new ProviderCreatedEvent(
+                userId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                request.getBankId(),
+                request.getBankNum(),
+                false
+        );
+        userEventProducer.publishProviderCreated(event);
+    }
+
     @Override
     @Transactional
     public void changePassword (Long userId, String oldPassword, String newPassword) {

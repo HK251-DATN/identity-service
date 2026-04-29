@@ -32,6 +32,14 @@ cloudflare:
 server:
   port: 9000
 
+services:
+  back-office:
+    url: http://${BACK_OFFICE_HOST:localhost}:${BACK_OFFICE_PORT:9100}
+  product-storage:
+    url: http://${PRODUCT_STORAGE_HOST:localhost}:${PRODUCT_STORAGE_PORT:9200}
+  ecommerce:
+    url: http://${ECOMMERCE_HOST:localhost}:${ECOMMERCE_PORT:9300}
+
 logging:
   level:
     org.springframework.web: DEBUG
