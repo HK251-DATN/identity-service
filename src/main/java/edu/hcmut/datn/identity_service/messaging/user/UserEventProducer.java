@@ -24,4 +24,28 @@ public class UserEventProducer {
             }
         });
     }
+
+    public void publishEmpCreated(EmpCreatedEvent event) {
+        kafkaTemplate.send("emp-create-events", event.userId().toString(), event).whenComplete((result, ex) -> {
+            if (ex != null) {
+                log.error("Failed to publish event", ex);
+            } else {
+                log.info("Event sent with offset {}",
+                        result.getRecordMetadata().offset()
+                );
+            }
+        });
+    }
+
+    public void publishProviderCreated(ProviderCreatedEvent event) {
+        kafkaTemplate.send("provider-create-events", event.userId().toString(), event).whenComplete((result, ex) -> {
+            if (ex != null) {
+                log.error("Failed to publish event", ex);
+            } else {
+                log.info("Event sent with offset {}",
+                        result.getRecordMetadata().offset()
+                );
+            }
+        });
+    }
 }
