@@ -1,34 +1,47 @@
 package edu.hcmut.datn.identity_service.config;
 
+import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+import tools.jackson.databind.ObjectMapper;
 import edu.hcmut.datn.identity_service.dao.Group;
 import edu.hcmut.datn.identity_service.dao.GroupPermission;
 import edu.hcmut.datn.identity_service.dao.Permission;
 import edu.hcmut.datn.identity_service.dao.User;
 import edu.hcmut.datn.identity_service.dao.UserGroup;
+import edu.hcmut.datn.identity_service.dto.request.EmployeeRegistrationRequest;
+import edu.hcmut.datn.identity_service.dto.request.ProviderRegistrationRequest;
+import edu.hcmut.datn.identity_service.dto.request.UserRegistrationRequest;
 import edu.hcmut.datn.identity_service.repository.GroupPermissionRepository;
 import edu.hcmut.datn.identity_service.repository.GroupRepository;
 import edu.hcmut.datn.identity_service.repository.PermissionRepository;
 import edu.hcmut.datn.identity_service.repository.UserGroupRepository;
 import edu.hcmut.datn.identity_service.repository.UserRepository;
+import edu.hcmut.datn.identity_service.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
-import java.time.LocalDateTime;
 
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
 public class DataSeeder {
 
+    private static final String INIT_DATA_FILE = "init_data.json";
+
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
     private final PermissionRepository permissionRepository;
     private final UserGroupRepository userGroupRepository;
     private final GroupPermissionRepository groupPermissionRepository;
+    private final UserService userService;
+    private final ObjectMapper objectMapper;
 
     @Bean
     public CommandLineRunner seedData() {
@@ -39,122 +52,196 @@ public class DataSeeder {
                 return;
             }
 
-            log.info("Starting database seeding...");
+            log.info("Starting database seeding from {}...", INIT_DATA_FILE);
 
-            // Seed Permissions
-            Permission userView = createPermission("USER_VIEW", "View users");
-            Permission userUpdate = createPermission("USER_UPDATE", "Update users");
-            Permission userDelete = createPermission("USER_DELETE", "Delete users");
-            Permission groupManage = createPermission("GROUP_MANAGE", "Manage groups");
-            Permission permissionManage = createPermission("PERMISSION_MANAGE", "Manage permissions");
-            Permission permissionView = createPermission("PERMISSION_VIEW", "View permissions");
+            InitData initData;
+            try (InputStream is = new ClassPathResource(INIT_DATA_FILE).getInputStream()) {
+                initData = objectMapper.readValue(is, InitData.class);
+            }
 
-            log.info("Seeded {} permissions", permissionRepository.count());
+            // Group name (BUYER/PROVIDER/EMPLOYEE) doubles as which registration flow
+            // a UserSeed goes through - derived from the UserGroups linkage instead of
+            // a redundant per-user "type" field.
+            Map<Integer, String> registrationTypeByUserJsonId =
+                    deriveRegistrationTypes(initData.getUserGroups(), initData.getGroups());
 
-            // Seed Groups
-            Group adminGroup = createGroup("ADMIN", "Administrator group");
-            Group buyerGroup = createGroup("BUYER", "Customer/Buyer group");
+            Map<Integer, Long> groupIdByJsonId = seedGroups(initData.getGroups());
+            Map<Integer, Long> permissionIdByJsonId = seedPermissions(initData.getPermissions());
+            Map<Integer, Long> userIdByJsonId = seedUsers(initData.getUsers(), registrationTypeByUserJsonId);
+            seedUserGroups(initData.getUserGroups(), userIdByJsonId, groupIdByJsonId);
+            seedGroupPermissions(initData.getGroupPermissions(), groupIdByJsonId, permissionIdByJsonId);
 
-            log.info("Seeded {} groups", groupRepository.count());
-
-            // Assign permissions to groups
-            assignPermissionToGroup(adminGroup, userView);
-            assignPermissionToGroup(adminGroup, userUpdate);
-            assignPermissionToGroup(adminGroup, userDelete);
-            assignPermissionToGroup(adminGroup, groupManage);
-            assignPermissionToGroup(adminGroup, permissionManage);
-            assignPermissionToGroup(adminGroup, permissionView);
-
-            assignPermissionToGroup(buyerGroup, userView); // Buyers can view their own profile
-
-            log.info("Assigned permissions to groups");
-
-            // Seed Users
-            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-
-            User admin = createUser(
-                "admin@gmail.com",
-                encoder.encode("admin")
-            );
-
-            User buyer = createUser(
-                "buyer@gmail.com",
-                encoder.encode("buyer")
-            );
-            
-            User buyer1 = createUser(
-                    "minh.tran@gmail.com",
-                    encoder.encode("minh.tran")
-            );
-            
-            User buyer2 = createUser(
-                    "huong.le@gmail.com",
-                    encoder.encode("huong.le")
-            );
-            
-            User buyer3 = createUser(
-                    "tuan.pham@gmail.com",
-                    encoder.encode("tuan.pham")
-            );
-            
-            User buyer4 = createUser(
-                    "linh.vo@gmail.com",
-                    encoder.encode("linh.vo")
-            );
-            
-            log.info("Seeded {} users", userRepository.count());
-
-            // Assign users to groups
-            assignUserToGroup(admin, adminGroup);
-            assignUserToGroup(buyer, buyerGroup);
-            assignUserToGroup(buyer1, buyerGroup);
-            assignUserToGroup(buyer2, buyerGroup);
-            assignUserToGroup(buyer3, buyerGroup);
-            assignUserToGroup(buyer4, buyerGroup);
-
-            log.info("Assigned users to groups");
             log.info("Database seeding completed successfully!");
         };
     }
 
-    private Permission createPermission(String code, String description) {
-        Permission permission = new Permission();
-        permission.setPerCode(code);
-        permission.setPerName(code); // Use code as name by default
-        permission.setPerDescription(description);
-        permission.setActive(true);
-        return permissionRepository.save(permission);
+    private Map<Integer, String> deriveRegistrationTypes(List<InitData.UserGroupSeed> userGroups,
+                                                          List<InitData.GroupSeed> groups) {
+        Map<Integer, String> groupNameByJsonId = new HashMap<>();
+        for (InitData.GroupSeed group : groups) {
+            groupNameByJsonId.put(group.getId(), group.getGroupName());
+        }
+
+        Map<Integer, String> registrationTypeByUserJsonId = new HashMap<>();
+        for (InitData.UserGroupSeed userGroup : userGroups) {
+            registrationTypeByUserJsonId.put(userGroup.getUserId(), groupNameByJsonId.get(userGroup.getGroupId()));
+        }
+
+        return registrationTypeByUserJsonId;
     }
 
-    private Group createGroup(String name, String description) {
-        Group group = new Group();
-        group.setGroupName(name);
-        group.setDescription(description);
-        group.setActive(true);
-        return groupRepository.save(group);
+    private Map<Integer, Long> seedGroups(List<InitData.GroupSeed> groups) {
+        Map<Integer, Long> groupIdByJsonId = new HashMap<>();
+
+        for (InitData.GroupSeed seed : groups) {
+            Group group = new Group();
+            group.setGroupName(seed.getGroupName());
+            group.setDescription(seed.getDescription());
+            group.setActive(seed.isActive());
+
+            Group saved = groupRepository.save(group);
+            groupIdByJsonId.put(seed.getId(), saved.getGroupId());
+        }
+
+        log.info("Seeded {} groups", groupRepository.count());
+        return groupIdByJsonId;
     }
 
-    private User createUser(String email, String hashedPassword) {
-        User user = new User();
-        user.setUserEmail(email);
-        user.setHashedPwd(hashedPassword);
-        return userRepository.save(user);
+    private Map<Integer, Long> seedPermissions(List<InitData.PermissionSeed> permissions) {
+        Map<Integer, Long> permissionIdByJsonId = new HashMap<>();
+
+        for (InitData.PermissionSeed seed : permissions) {
+            Permission permission = new Permission();
+            permission.setPerCode(seed.getPerCode());
+            permission.setPerName(seed.getPerName());
+            permission.setPerDescription(seed.getPerDescription());
+            permission.setActive(seed.isActive());
+
+            Permission saved = permissionRepository.save(permission);
+            permissionIdByJsonId.put(seed.getId(), saved.getPerId());
+        }
+
+        log.info("Seeded {} permissions", permissionRepository.count());
+        return permissionIdByJsonId;
     }
 
-    private void assignPermissionToGroup(Group group, Permission permission) {
-        GroupPermission groupPermission = new GroupPermission();
-        groupPermission.setGroupId(group.getGroupId());
-        groupPermission.setPerId(permission.getPerId());
-        groupPermission.setActive(true);
-        groupPermission.setValidUntil(LocalDateTime.now().plusYears(10)); // Valid for 10 years
-        groupPermissionRepository.save(groupPermission);
+    private Map<Integer, Long> seedUsers(List<InitData.UserSeed> users,
+                                          Map<Integer, String> registrationTypeByUserJsonId) {
+        Map<Integer, Long> userIdByJsonId = new HashMap<>();
+
+        for (InitData.UserSeed seed : users) {
+            String type = registrationTypeByUserJsonId.get(seed.getId());
+            if (type == null) {
+                log.warn("User '{}' isn't linked to any group in UserGroups, skipping (can't determine registration flow)",
+                        seed.getEmail());
+                continue;
+            }
+
+            // Routed through UserService so seeding persists the user AND publishes
+            // the matching Kafka event, same as the real registration endpoints do.
+            User created = switch (type) {
+                case "BUYER" -> userService.create(toUserRegistrationRequest(seed));
+                case "EMPLOYEE" -> userService.create(toEmployeeRegistrationRequest(seed));
+                case "PROVIDER" -> userService.createProvider(toProviderRegistrationRequest(seed));
+                default -> {
+                    log.warn("User '{}' is linked to unknown group '{}', skipping", seed.getEmail(), type);
+                    yield null;
+                }
+            };
+
+            if (created == null) {
+                log.warn("Failed to seed user '{}' (duplicate email or invalid data), skipping", seed.getEmail());
+                continue;
+            }
+
+            userIdByJsonId.put(seed.getId(), created.getUserId());
+        }
+
+        log.info("Seeded {} users", userRepository.count());
+        return userIdByJsonId;
     }
 
-    private void assignUserToGroup(User user, Group group) {
-        UserGroup userGroup = new UserGroup();
-        userGroup.setUserId(user.getUserId());
-        userGroup.setGroupId(group.getGroupId());
-        userGroup.setActive(true);
-        userGroupRepository.save(userGroup);
+    private UserRegistrationRequest toUserRegistrationRequest(InitData.UserSeed seed) {
+        UserRegistrationRequest request = new UserRegistrationRequest();
+        request.setEmail(seed.getEmail());
+        request.setPassword(seed.getPassword());
+        request.setFName(seed.getFName());
+        request.setLName(seed.getLName());
+        request.setDob(seed.getDob());
+        request.setPNum(seed.getPNum());
+        request.setGender(seed.getGender());
+        return request;
+    }
+
+    private EmployeeRegistrationRequest toEmployeeRegistrationRequest(InitData.UserSeed seed) {
+        EmployeeRegistrationRequest request = new EmployeeRegistrationRequest();
+        request.setEmail(seed.getEmail());
+        request.setFName(seed.getFName());
+        request.setLName(seed.getLName());
+        request.setDob(seed.getDob());
+        request.setPNum(seed.getPNum());
+        request.setGender(seed.getGender());
+        return request;
+    }
+
+    private ProviderRegistrationRequest toProviderRegistrationRequest(InitData.UserSeed seed) {
+        ProviderRegistrationRequest request = new ProviderRegistrationRequest();
+        request.setEmail(seed.getEmail());
+        request.setPassword(seed.getPassword());
+        request.setFName(seed.getFName());
+        request.setLName(seed.getLName());
+        request.setDob(seed.getDob());
+        request.setPNum(seed.getPNum());
+        request.setGender(seed.getGender());
+        request.setBankId(seed.getBankId());
+        request.setBankNum(seed.getBankNum());
+        return request;
+    }
+
+    private void seedUserGroups(List<InitData.UserGroupSeed> userGroups,
+                                 Map<Integer, Long> userIdByJsonId,
+                                 Map<Integer, Long> groupIdByJsonId) {
+        for (InitData.UserGroupSeed seed : userGroups) {
+            Long userId = userIdByJsonId.get(seed.getUserId());
+            Long groupId = groupIdByJsonId.get(seed.getGroupId());
+
+            if (userId == null || groupId == null) {
+                log.warn("Skipping UserGroup entry referencing unknown userId={} or groupId={}",
+                        seed.getUserId(), seed.getGroupId());
+                continue;
+            }
+
+            UserGroup userGroup = new UserGroup();
+            userGroup.setUserId(userId);
+            userGroup.setGroupId(groupId);
+            userGroup.setActive(seed.isActive());
+            userGroupRepository.save(userGroup);
+        }
+
+        log.info("Assigned users to groups");
+    }
+
+    private void seedGroupPermissions(List<InitData.GroupPermissionSeed> groupPermissions,
+                                       Map<Integer, Long> groupIdByJsonId,
+                                       Map<Integer, Long> permissionIdByJsonId) {
+        for (InitData.GroupPermissionSeed seed : groupPermissions) {
+            Long groupId = groupIdByJsonId.get(seed.getGroupId());
+            Long perId = permissionIdByJsonId.get(seed.getPerId());
+
+            if (groupId == null || perId == null) {
+                log.warn("Skipping GroupPermission entry referencing unknown groupId={} or perId={}",
+                        seed.getGroupId(), seed.getPerId());
+                continue;
+            }
+
+            GroupPermission groupPermission = new GroupPermission();
+            groupPermission.setGroupId(groupId);
+            groupPermission.setPerId(perId);
+            groupPermission.setActive(seed.isActive());
+            groupPermission.setValidUntil(LocalDateTime.now().plusYears(10));
+            groupPermissionRepository.save(groupPermission);
+        }
+
+        log.info("Assigned permissions to groups");
     }
 }

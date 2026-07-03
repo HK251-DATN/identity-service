@@ -5,8 +5,10 @@ import java.time.LocalDate;
 import edu.hcmut.datn.identity_service.common.enums.Bank;
 import edu.hcmut.datn.identity_service.common.enums.Gender;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class ProviderRegistrationRequest {
     private String email;
     private String password;

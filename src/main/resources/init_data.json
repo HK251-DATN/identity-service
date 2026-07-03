@@ -1,0 +1,181 @@
+{
+  "Groups": [
+    {
+      "id": 1,
+      "groupName": "BUYER",
+      "description": "Standard users who purchase products on the platform",
+      "isActive": true
+    },
+    {
+      "id": 2,
+      "groupName": "PROVIDER",
+      "description": "Merchants and vendors who sell products on the platform",
+      "isActive": true
+    },
+    {
+      "id": 3,
+      "groupName": "EMPLOYEE",
+      "description": "Internal ecommerce staff and administrators",
+      "isActive": true
+    }
+  ],
+  "Users": [
+    {
+      "id": 1,
+      "email": "buyer1@example.com",
+      "password": "password_123",
+      "fName": "Lan",
+      "lName": "Nguyễn",
+      "avtUrl": "https://pub-954e99f131cf4cc896de1ad360338682.r2.dev/128c271e-c0a6-433e-bcd1-f3bbc4243401-default-user-avt.png",
+      "dob": "1990-05-15",
+      "pNum": "0901234001",
+      "gender": "FEMALE"
+    },
+    {
+      "id": 2,
+      "email": "buyer2@example.com",
+      "password": "password_123",
+      "fName": "Tuấn",
+      "lName": "Trần",
+      "avtUrl": "https://pub-954e99f131cf4cc896de1ad360338682.r2.dev/128c271e-c0a6-433e-bcd1-f3bbc4243401-default-user-avt.png",
+      "dob": "1985-11-20",
+      "pNum": "0981234002",
+      "gender": "MALE"
+    },
+    {
+      "id": 3,
+      "email": "buyer3@example.com",
+      "password": "password_123",
+      "fName": "Minh",
+      "lName": "Lê",
+      "avtUrl": "https://pub-954e99f131cf4cc896de1ad360338682.r2.dev/128c271e-c0a6-433e-bcd1-f3bbc4243401-default-user-avt.png",
+      "dob": "1992-02-10",
+      "pNum": "0911234003",
+      "gender": "MALE"
+    },
+    {
+      "id": 4,
+      "email": "buyer4@example.com",
+      "password": "password_123",
+      "fName": "Hương",
+      "lName": "Phạm",
+      "avtUrl": "https://pub-954e99f131cf4cc896de1ad360338682.r2.dev/128c271e-c0a6-433e-bcd1-f3bbc4243401-default-user-avt.png",
+      "dob": "1988-08-08",
+      "pNum": "0901234004",
+      "gender": "FEMALE"
+    },
+    {
+      "id": 5,
+      "email": "buyer5@example.com",
+      "password": "password_123",
+      "fName": "Đức",
+      "lName": "Vũ",
+      "avtUrl": "https://pub-954e99f131cf4cc896de1ad360338682.r2.dev/128c271e-c0a6-433e-bcd1-f3bbc4243401-default-user-avt.png",
+      "dob": "1995-12-01",
+      "pNum": "0981234005",
+      "gender": "MALE"
+    },
+    {
+      "id": 6,
+      "email": "provider1@example.com",
+      "password": "hashed_password_123",
+      "fName": "Mai",
+      "lName": "Hoàng",
+      "avtUrl": "https://pub-954e99f131cf4cc896de1ad360338682.r2.dev/128c271e-c0a6-433e-bcd1-f3bbc4243401-default-user-avt.png",
+      "dob": "1980-03-25",
+      "pNum": "0911234006",
+      "gender": "FEMALE",
+      "bankId": 1,
+      "bankNum": "19031234567001",
+      "isFreshAccount": true
+    },
+    {
+      "id": 7,
+      "email": "provider2@example.com",
+      "password": "hashed_password_123",
+      "fName": "Hùng",
+      "lName": "Đặng",
+      "avtUrl": "https://pub-954e99f131cf4cc896de1ad360338682.r2.dev/128c271e-c0a6-433e-bcd1-f3bbc4243401-default-user-avt.png",
+      "dob": "1978-07-14",
+      "pNum": "0901234007",
+      "gender": "MALE",
+      "bankId": 2,
+      "bankNum": "0071001234567",
+      "isFreshAccount": true
+    },
+    {
+      "id": 8,
+      "email": "provider3@example.com",
+      "password": "hashed_password_123",
+      "fName": "Linh",
+      "lName": "Bùi",
+      "avtUrl": "https://pub-954e99f131cf4cc896de1ad360338682.r2.dev/128c271e-c0a6-433e-bcd1-f3bbc4243401-default-user-avt.png",
+      "dob": "1982-09-30",
+      "pNum": "0981234008",
+      "gender": "FEMALE",
+      "bankId": 1,
+      "bankNum": "19039876543002",
+      "isFreshAccount": true
+    },
+    {
+      "id": 9,
+      "email": "employee1@example.com",
+      "password": "password_123",
+      "fName": "Hoàng",
+      "lName": "Đỗ",
+      "avtUrl": "https://pub-954e99f131cf4cc896de1ad360338682.r2.dev/128c271e-c0a6-433e-bcd1-f3bbc4243401-default-user-avt.png",
+      "dob": "1991-04-12",
+      "pNum": "0911234009",
+      "gender": "MALE"
+    }
+  ],
+  "Permissions": [],
+  "UserGroups": [
+    {
+      "userId": 1,
+      "groupId": 1,
+      "isActive": true
+    },
+    {
+      "userId": 2,
+      "groupId": 1,
+      "isActive": true
+    },
+    {
+      "userId": 3,
+      "groupId": 1,
+      "isActive": true
+    },
+    {
+      "userId": 4,
+      "groupId": 1,
+      "isActive": true
+    },
+    {
+      "userId": 5,
+      "groupId": 1,
+      "isActive": true
+    },
+    {
+      "userId": 6,
+      "groupId": 2,
+      "isActive": true
+    },
+    {
+      "userId": 7,
+      "groupId": 2,
+      "isActive": true
+    },
+    {
+      "userId": 8,
+      "groupId": 2,
+      "isActive": true
+    },
+    {
+      "userId": 9,
+      "groupId": 3,
+      "isActive": true
+    }
+  ],
+  "GroupPermissions": []
+}
