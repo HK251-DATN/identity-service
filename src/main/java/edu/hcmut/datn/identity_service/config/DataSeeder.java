@@ -176,6 +176,7 @@ public class DataSeeder {
     private EmployeeRegistrationRequest toEmployeeRegistrationRequest(InitData.UserSeed seed) {
         EmployeeRegistrationRequest request = new EmployeeRegistrationRequest();
         request.setEmail(seed.getEmail());
+        request.setPassword(seed.getPassword());
         request.setFName(seed.getFName());
         request.setLName(seed.getLName());
         request.setDob(seed.getDob());

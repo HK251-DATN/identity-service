@@ -10,6 +10,7 @@ import lombok.Setter;
 @Setter
 public class EmployeeRegistrationRequest {
     private String email;
+    private String password;
     private String fName;
     private String lName;
     private LocalDate dob;

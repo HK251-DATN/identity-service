@@ -90,7 +90,7 @@ public class UserServiceImpl implements UserService {
     public User create(EmployeeRegistrationRequest request) {
         User user = new User();
         user.setUserEmail(request.getEmail());
-        user.setHashedPwd("12345678"); // Default password
+        user.setHashedPwd(request.getPassword());
         User newUser = create(user);
 
         String avtUrl = "https://pub-954e99f131cf4cc896de1ad360338682.r2.dev/128c271e-c0a6-433e-bcd1-f3bbc4243401-default-user-avt.png";

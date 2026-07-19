@@ -127,6 +127,62 @@
       "dob": "1991-04-12",
       "pNum": "0911234009",
       "gender": "MALE"
+    },
+    {
+      "id": 10,
+      "email": "provider4@example.com",
+      "password": "hashed_password_123",
+      "fName": "Thảo",
+      "lName": "Ngô",
+      "avtUrl": "https://pub-954e99f131cf4cc896de1ad360338682.r2.dev/128c271e-c0a6-433e-bcd1-f3bbc4243401-default-user-avt.png",
+      "dob": "1987-06-18",
+      "pNum": "0901234010",
+      "gender": "FEMALE",
+      "bankId": 2,
+      "bankNum": "0071009876543",
+      "isFreshAccount": true
+    },
+    {
+      "id": 11,
+      "email": "provider5@example.com",
+      "password": "hashed_password_123",
+      "fName": "Quang",
+      "lName": "Huỳnh",
+      "avtUrl": "https://pub-954e99f131cf4cc896de1ad360338682.r2.dev/128c271e-c0a6-433e-bcd1-f3bbc4243401-default-user-avt.png",
+      "dob": "1983-01-20",
+      "pNum": "0911234011",
+      "gender": "MALE",
+      "bankId": 1,
+      "bankNum": "19031234567003",
+      "isFreshAccount": true
+    },
+    {
+      "id": 12,
+      "email": "provider6@example.com",
+      "password": "hashed_password_123",
+      "fName": "Yến",
+      "lName": "Phan",
+      "avtUrl": "https://pub-954e99f131cf4cc896de1ad360338682.r2.dev/128c271e-c0a6-433e-bcd1-f3bbc4243401-default-user-avt.png",
+      "dob": "1990-10-05",
+      "pNum": "0901234012",
+      "gender": "FEMALE",
+      "bankId": 2,
+      "bankNum": "0071001234568",
+      "isFreshAccount": true
+    },
+    {
+      "id": 13,
+      "email": "provider7@example.com",
+      "password": "hashed_password_123",
+      "fName": "Nam",
+      "lName": "Võ",
+      "avtUrl": "https://pub-954e99f131cf4cc896de1ad360338682.r2.dev/128c271e-c0a6-433e-bcd1-f3bbc4243401-default-user-avt.png",
+      "dob": "1986-03-15",
+      "pNum": "0981234013",
+      "gender": "MALE",
+      "bankId": 1,
+      "bankNum": "19039876543004",
+      "isFreshAccount": true
     }
   ],
   "Permissions": [],
@@ -174,6 +230,26 @@
     {
       "userId": 9,
       "groupId": 3,
+      "isActive": true
+    },
+    {
+      "userId": 10,
+      "groupId": 2,
+      "isActive": true
+    },
+    {
+      "userId": 11,
+      "groupId": 2,
+      "isActive": true
+    },
+    {
+      "userId": 12,
+      "groupId": 2,
+      "isActive": true
+    },
+    {
+      "userId": 13,
+      "groupId": 2,
       "isActive": true
     }
   ],

@@ -95,9 +95,9 @@ All endpoints return `ApiResponse<T>`:
 | | Buyer (`/buyer-register`) | Employee (`/emp-register`) |
 |---|---|---|
 | Auth required | No | Yes |
-| Password | Provided by user | Auto-set to `"12345678"` |
+| Password | Provided by user | Provided by user |
 | Kafka topic | `user-events` (via `UserCreatedEvent`) | `emp-create-events` (via `EmpCreatedEvent`) |
-| Request type | `UserRegistrationRequest` | `EmployeeRegistrationRequest` (no password field) |
+| Request type | `UserRegistrationRequest` | `EmployeeRegistrationRequest` |
 
 Both responses clear `hashedPwd` before returning.
 
