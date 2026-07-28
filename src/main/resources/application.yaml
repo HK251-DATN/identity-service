@@ -31,6 +31,7 @@ cloudflare:
 
 server:
   port: 9000
+  forward-headers-strategy: framework
 
 management:
   endpoint:
